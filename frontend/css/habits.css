@@ -1,0 +1,236 @@
+/* Habits list + habit detail */
+
+.habit-filters {
+  display: flex;
+  gap: var(--sp-2);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--sp-5);
+}
+
+.habit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-4);
+}
+
+.habit-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  transition: border-color var(--t-fast), transform var(--t-fast);
+}
+
+.habit-card:hover {
+  border-color: var(--border-strong);
+}
+
+.habit-card.is-done {
+  border-color: rgba(67, 233, 123, 0.4);
+  background: rgba(67, 233, 123, 0.06);
+}
+
+.habit-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.habit-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.habit-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.habit-card-menu {
+  position: relative;
+}
+
+.habit-card-menu-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.habit-card-menu-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.habit-card-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  padding: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 20;
+  display: none;
+}
+
+.habit-card-menu.open .habit-card-menu-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.habit-card-menu-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.habit-card-menu-list button:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.habit-card-menu-list .danger {
+  color: #ff8a8a;
+}
+
+.habit-card-actions {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: auto;
+}
+
+.habit-card-actions .btn {
+  flex: 1;
+}
+
+/* --- Habit detail --- */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: var(--sp-3);
+}
+
+.back-link:hover {
+  color: var(--text-primary);
+}
+
+.detail-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-hero-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-4);
+}
+
+.detail-hero h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.detail-hero p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.detail-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--sp-3);
+}
+
+.detail-stat {
+  padding: var(--sp-3);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.detail-stat strong {
+  font-size: 22px;
+  font-weight: 700;
+  display: block;
+}
+
+.detail-stat span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.detail-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* --- Heatmap --- */
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 4px;
+  padding: var(--sp-2) 0;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  background: var(--surface-2);
+  border-radius: 4px;
+  position: relative;
+  cursor: default;
+  transition: transform var(--t-fast);
+}
+
+.heatmap-cell.l1 { background: rgba(102, 126, 234, 0.4); }
+.heatmap-cell.l2 { background: rgba(102, 126, 234, 0.7); }
+.heatmap-cell.l3 { background: var(--primary-gradient); }
+.heatmap-cell:hover {
+  transform: scale(1.15);
+  z-index: 2;
+}
+
+.heatmap-cell[title] {
+  cursor: help;
+}
+
+/* --- Recent logs list --- */
+.log-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.log-row:last-child { border-bottom: none; }
+
+.log-row strong { color: var(--accent-cyan); }
+
+@media (max-width: 1024px) {
+  .heatmap {
+    grid-template-columns: repeat(10, 1fr);
+  }
+}

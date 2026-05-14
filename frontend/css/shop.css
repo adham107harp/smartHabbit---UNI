@@ -1,0 +1,109 @@
+/* Shop */
+
+.shop-balance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 138, 76, 0.1));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+}
+
+.shop-balance i {
+  color: var(--accent-gold);
+  font-size: 18px;
+}
+
+.shop-balance strong {
+  font-size: 20px;
+  color: var(--accent-gold);
+}
+
+.shop-balance span {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sp-4);
+}
+
+.shop-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: transform var(--t-base), border-color var(--t-base);
+  position: relative;
+}
+
+.shop-item:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+
+.shop-item-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  background: var(--primary-gradient);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  margin: 0 auto;
+}
+
+.shop-item.type-theme .shop-item-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.shop-item.type-avatar_item .shop-item-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.shop-item.type-consumable .shop-item-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #0a0b17; }
+.shop-item.type-badge .shop-item-icon { background: linear-gradient(135deg, #ffd700, #ff8a4c); }
+
+.shop-item h4 {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.shop-item p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  text-align: center;
+  flex: 1;
+}
+
+.shop-item-price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent-gold);
+}
+
+.shop-item-action .btn {
+  width: 100%;
+}
+
+.shop-item.owned::after {
+  content: 'Owned';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--success-gradient);
+  color: #0a0b17;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

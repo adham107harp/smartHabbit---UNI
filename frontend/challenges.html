@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Challenges · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/challenges.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Challenges</h1>
+            <p class="page-subtitle">Time-limited events with big XP and coin rewards. Join one and ride the streak.</p>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="all">All challenges</button>
+          <button class="tab" data-tab="joined">Joined by me</button>
+        </div>
+
+        <div class="challenge-grid" data-challenge-grid>
+          <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/challenges.js"></script>
+</body>
+</html>

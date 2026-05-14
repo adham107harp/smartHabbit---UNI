@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Habits · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/habits.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">My habits</h1>
+            <p class="page-subtitle">Add, edit, and log every habit you're building.</p>
+          </div>
+          <button class="btn btn-primary" id="open-create-habit">
+            <i class="fa-solid fa-plus"></i> New habit
+          </button>
+        </div>
+
+        <div class="habit-filters">
+          <button class="tab active" data-filter="all">All</button>
+          <button class="tab" data-filter="daily">Daily</button>
+          <button class="tab" data-filter="weekly">Weekly</button>
+        </div>
+
+        <div class="habit-grid" data-habit-grid>
+          <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/habits.js"></script>
+</body>
+</html>

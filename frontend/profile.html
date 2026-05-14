@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/profile.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <h1 class="page-title">My profile</h1>
+        </div>
+
+        <section class="card profile-hero">
+          <div class="profile-hero-left">
+            <div class="profile-avatar" data-avatar>
+              <span data-initial>?</span>
+            </div>
+            <div class="profile-hero-info">
+              <h2 data-username>...</h2>
+              <p class="text-muted" data-email></p>
+              <div class="profile-hero-meta">
+                <span><i class="fa-solid fa-star"></i> Level <strong data-level>1</strong></span>
+                <span><i class="fa-solid fa-fire"></i> Streak <strong data-streak>0</strong></span>
+                <span><i class="fa-solid fa-coins"></i> <strong data-coins>0</strong> coins</span>
+              </div>
+              <small class="text-muted" data-joined></small>
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="edit-profile-btn">
+            <i class="fa-solid fa-pen"></i> Edit profile
+          </button>
+        </section>
+
+        <div class="dash-grid mt-5">
+          <section class="card">
+            <div class="card-header">
+              <h2 class="card-title">Lifetime stats</h2>
+            </div>
+            <div class="profile-stats" data-stats>
+              <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-header">
+              <h2 class="card-title">Latest badges</h2>
+              <a class="btn btn-ghost btn-sm" href="badges.html">All badges</a>
+            </div>
+            <div data-badges>
+              <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/settings.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <h1 class="page-title">Settings</h1>
+        </div>
+
+        <div class="settings-layout">
+          <nav class="settings-nav">
+            <a href="#account" class="settings-nav-link active" data-target="account"><i class="fa-solid fa-user"></i> Account</a>
+            <a href="#preferences" class="settings-nav-link" data-target="preferences"><i class="fa-solid fa-sliders"></i> Preferences</a>
+            <a href="#notifications" class="settings-nav-link" data-target="notifications"><i class="fa-solid fa-bell"></i> Notifications</a>
+            <a href="#danger" class="settings-nav-link" data-target="danger"><i class="fa-solid fa-triangle-exclamation"></i> Danger zone</a>
+          </nav>
+
+          <div class="settings-content">
+            <!-- ACCOUNT -->
+            <section class="card" id="account">
+              <div class="card-header"><h2 class="card-title">Account</h2></div>
+              <form id="account-form">
+                <div class="field">
+                  <label for="username">Username</label>
+                  <input id="username" required minlength="3" maxlength="50">
+                  <span class="field-hint">This is how friends will find you.</span>
+                </div>
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" type="email" disabled>
+                  <span class="field-hint">Email cannot be changed once you've signed up.</span>
+                </div>
+                <div class="field">
+                  <label for="avatar-url">Avatar URL</label>
+                  <input id="avatar-url" type="url" placeholder="https://...">
+                </div>
+                <button class="btn btn-primary" type="submit">Save changes</button>
+              </form>
+            </section>
+
+            <!-- PREFERENCES -->
+            <section class="card" id="preferences">
+              <div class="card-header"><h2 class="card-title">Preferences</h2></div>
+              <div class="setting-row">
+                <div>
+                  <strong>Theme</strong>
+                  <p class="text-muted">Pick the look that suits you.</p>
+                </div>
+                <select id="pref-theme">
+                  <option value="dark">Dark (default)</option>
+                  <option value="midnight">Midnight</option>
+                  <option value="sunrise">Sunrise</option>
+                  <option value="ocean">Ocean</option>
+                </select>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <strong>Sound effects</strong>
+                  <p class="text-muted">Play a little chime when you log a habit.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="pref-sounds">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <strong>Reduce motion</strong>
+                  <p class="text-muted">Smaller animations across the app.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="pref-reduce-motion">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </section>
+
+            <!-- NOTIFICATIONS -->
+            <section class="card" id="notifications">
+              <div class="card-header"><h2 class="card-title">Notifications</h2></div>
+              <div class="setting-row">
+                <div>
+                  <strong>Level-ups</strong>
+                  <p class="text-muted">Tell me when I level up.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="notif-level" checked><span class="slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <strong>Badges</strong>
+                  <p class="text-muted">Tell me when I unlock a badge.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="notif-badge" checked><span class="slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <strong>Streak alerts</strong>
+                  <p class="text-muted">Warn me when my streak is at risk.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="notif-streak" checked><span class="slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <strong>Friend activity</strong>
+                  <p class="text-muted">Tell me when a friend levels up.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="notif-friends"><span class="slider"></span></label>
+              </div>
+              <p class="text-muted mt-3" style="font-size: 13px;">These choices are saved on your device.</p>
+            </section>
+
+            <!-- DANGER -->
+            <section class="card" id="danger">
+              <div class="card-header"><h2 class="card-title">Danger zone</h2></div>
+              <div class="setting-row">
+                <div>
+                  <strong>Log out</strong>
+                  <p class="text-muted">Sign out on this device.</p>
+                </div>
+                <button class="btn btn-secondary" id="logout-btn">
+                  <i class="fa-solid fa-right-from-bracket"></i> Log out
+                </button>
+              </div>
+              <div class="setting-row danger">
+                <div>
+                  <strong>Delete account</strong>
+                  <p class="text-muted">Your account will be deactivated. This cannot be undone.</p>
+                </div>
+                <button class="btn btn-danger" id="delete-account-btn">
+                  <i class="fa-solid fa-trash"></i> Delete my account
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>

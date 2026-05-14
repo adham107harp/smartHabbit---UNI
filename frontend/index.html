@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartHabbit — Build Better Habits</title>
+  <meta name="description" content="SmartHabbit turns your daily routine into a game. Track habits, earn XP, level up, unlock badges, and beat your friends.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+  <header class="landing-header">
+    <a class="brand" href="index.html">
+      <span class="brand-logo"><i class="fa-solid fa-bolt"></i></span>
+      <span class="brand-text">SmartHabbit</span>
+    </a>
+    <nav class="landing-nav">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="landing-actions">
+      <a class="btn btn-ghost" href="login.html">Log in</a>
+      <a class="btn btn-primary" href="register.html">Get started</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-pill">
+          <i class="fa-solid fa-sparkles"></i>
+          Build better habits, one quest at a time
+        </div>
+        <h1>Turn your daily routine into a <span class="gradient-text">game you actually win</span>.</h1>
+        <p class="hero-tagline">
+          Track your habits, earn XP and coins, climb the leaderboard, and unlock badges as you build the version of yourself you actually want to be.
+        </p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary btn-lg" href="register.html">
+            Start free <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <a class="btn btn-secondary btn-lg" href="login.html">
+            I already have an account
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>10+</strong><span>Badges to unlock</span></div>
+          <div><strong>3</strong><span>Active challenges</span></div>
+          <div><strong>8</strong><span>Shop rewards</span></div>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="hero-card hero-card-1">
+          <div class="hero-card-head">
+            <span class="diff-badge diff-easy">easy</span>
+            <i class="fa-solid fa-fire" style="color:#ff8a4c"></i>
+          </div>
+          <h4>Drink Water</h4>
+          <p>Daily · 1 cup</p>
+          <div class="progress mt-3"><div class="progress-fill" style="width:100%"></div></div>
+          <small class="text-muted">+10 XP earned today</small>
+        </div>
+        <div class="hero-card hero-card-2">
+          <div class="hero-card-head">
+            <span class="diff-badge diff-hard">hard</span>
+            <i class="fa-solid fa-trophy" style="color:var(--accent-gold)"></i>
+          </div>
+          <h4>Read 30 minutes</h4>
+          <p>Daily · 30 min</p>
+          <div class="progress mt-3"><div class="progress-fill" style="width:60%"></div></div>
+          <small class="text-muted">+30 XP available</small>
+        </div>
+        <div class="hero-card hero-card-3">
+          <div class="hero-card-head">
+            <i class="fa-solid fa-medal" style="color:var(--accent-gold)"></i>
+            <strong>Badge unlocked!</strong>
+          </div>
+          <h4>7-Day Warrior</h4>
+          <p>Maintain a 7-day streak. Nice work.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="features">
+      <div class="section-head">
+        <h2>Everything you need to stay on track</h2>
+        <p>Designed around a simple idea: if it feels like a game, you'll actually do it.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="feature-icon" style="background:var(--primary-gradient)"><i class="fa-solid fa-list-check"></i></div>
+          <h3>Smart habit tracking</h3>
+          <p>Daily and weekly habits, three difficulty levels, and one-tap logging. Your streak grows automatically.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon" style="background:var(--success-gradient)"><i class="fa-solid fa-bolt"></i></div>
+          <h3>XP &amp; level up</h3>
+          <p>Every completion earns XP. Hit milestones and watch your level grow with the same math used by real games.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon" style="background:linear-gradient(135deg,#ffc300 0%,#ff8a4c 100%)"><i class="fa-solid fa-medal"></i></div>
+          <h3>Achievements</h3>
+          <p>Unlock badges for streaks, completions, and total XP. They light up in real time the moment you earn them.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon" style="background:var(--secondary-gradient)"><i class="fa-solid fa-ranking-star"></i></div>
+          <h3>Leaderboards</h3>
+          <p>Climb the global, weekly, and friends-only boards. Healthy competition is the best motivator.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon" style="background:linear-gradient(135deg,#43e97b 0%,#38f9d7 100%)"><i class="fa-solid fa-trophy"></i></div>
+          <h3>Challenges</h3>
+          <p>Time-limited events with bonus XP and coins. Join a 7-day sprint or a 30-day marathon.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon" style="background:linear-gradient(135deg,#667eea 0%,#f5576c 100%)"><i class="fa-solid fa-bag-shopping"></i></div>
+          <h3>Reward shop</h3>
+          <p>Spend coins on avatar frames, themes, streak shields, and XP boosts. Real rewards for real progress.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="how">
+      <div class="section-head">
+        <h2>How it works</h2>
+        <p>Three steps. That's it.</p>
+      </div>
+      <div class="how-grid">
+        <div class="how-step">
+          <div class="how-num">1</div>
+          <h3>Add a habit</h3>
+          <p>Pick a name, a difficulty, and a daily or weekly schedule. You're done in 10 seconds.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num">2</div>
+          <h3>Log it every day</h3>
+          <p>One tap to mark it done. We award XP and coins, and your streak climbs by one.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num">3</div>
+          <h3>Watch yourself grow</h3>
+          <p>Level up, unlock badges, beat your friends, and spend coins in the shop. Repeat.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="about" class="cta">
+      <div class="cta-card">
+        <h2>Ready to build the habit you've been putting off?</h2>
+        <p>Free, no credit card, takes less than a minute.</p>
+        <a class="btn btn-primary btn-lg" href="register.html">
+          Create my account <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <p>&copy; 2026 SmartHabbit. Built for a university project.</p>
+  </footer>
+</body>
+</html>

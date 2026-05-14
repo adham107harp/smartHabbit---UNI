@@ -1,0 +1,118 @@
+/* Badges page */
+
+.badge-summary {
+  font-size: 15px;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+}
+
+.badge-summary strong {
+  color: var(--text-primary);
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--sp-4);
+}
+
+.badge-card {
+  position: relative;
+  padding: var(--sp-5);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: transform var(--t-base), border-color var(--t-base);
+  overflow: hidden;
+}
+
+.badge-card.earned {
+  border-color: var(--accent-gold);
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.08), var(--surface-1));
+}
+
+.badge-card.earned::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(255, 215, 0, 0.18) 30%, transparent 60%);
+  animation: badge-shine 6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes badge-shine {
+  to { transform: rotate(360deg); }
+}
+
+.badge-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+
+.badge-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--sp-3);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  color: rgba(255, 255, 255, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+.badge-card.earned .badge-icon {
+  background: linear-gradient(135deg, #ffd700, #ff8a4c);
+  color: white;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+.badge-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.badge-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: var(--sp-3);
+  position: relative;
+  z-index: 1;
+}
+
+.badge-progress {
+  position: relative;
+  z-index: 1;
+}
+
+.badge-progress small {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.badge-earned-stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--accent-gold);
+  color: #4a3a00;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}

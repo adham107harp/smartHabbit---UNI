@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Badges · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/badges.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Badges</h1>
+            <p class="page-subtitle">Earn badges by hitting milestones. They light up the moment you unlock them.</p>
+          </div>
+          <div class="badge-summary">
+            <strong data-earned-count>0</strong> of <strong data-total-count>0</strong> earned
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="all">All</button>
+          <button class="tab" data-tab="earned">Earned</button>
+          <button class="tab" data-tab="locked">Locked</button>
+        </div>
+
+        <div class="badge-grid" data-badge-grid>
+          <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/badges.js"></script>
+</body>
+</html>

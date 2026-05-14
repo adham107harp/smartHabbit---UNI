@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friends · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/friends.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Friends</h1>
+            <p class="page-subtitle">Add people you know, accept requests, and compete on the friends-only leaderboard.</p>
+          </div>
+          <button class="btn btn-primary" id="add-friend-btn">
+            <i class="fa-solid fa-user-plus"></i> Add friend
+          </button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="friends">My friends</button>
+          <button class="tab" data-tab="requests">Requests <span class="req-count" data-req-count></span></button>
+        </div>
+
+        <div data-friends-section>
+          <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/friends.js"></script>
+</body>
+</html>

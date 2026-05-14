@@ -1,0 +1,80 @@
+/* Notifications */
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+}
+
+.notif-row:last-child { border-bottom: none; }
+
+.notif-row.unread {
+  background: rgba(102, 126, 234, 0.06);
+}
+
+.notif-row:hover { background: var(--surface-1); }
+
+.notif-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  color: white;
+}
+
+.notif-icon.level    { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.notif-icon.badge    { background: linear-gradient(135deg, #ffd700, #ff8a4c); }
+.notif-icon.streak   { background: linear-gradient(135deg, #f5576c, #ff8a4c); }
+.notif-icon.friend   { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #0a0b17; }
+.notif-icon.challenge{ background: linear-gradient(135deg, #f093fb, #f5576c); }
+.notif-icon.shop     { background: linear-gradient(135deg, #667eea, #764ba2); }
+.notif-icon.default  { background: var(--surface-3); color: var(--text-secondary); }
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-body strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.notif-body p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.notif-body small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.notif-actions {
+  display: flex;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+}
+
+.notif-actions button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+}
+
+.notif-actions button:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}

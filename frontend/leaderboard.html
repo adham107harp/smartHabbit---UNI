@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/leaderboard.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Leaderboard</h1>
+            <p class="page-subtitle">See how you stack up against everyone — or just your friends.</p>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-board="global">Global</button>
+          <button class="tab" data-board="weekly">This week</button>
+          <button class="tab" data-board="friends">Friends</button>
+        </div>
+
+        <section class="card">
+          <div class="lb-podium" data-podium></div>
+          <div class="lb-list" data-list>
+            <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/leaderboard.js"></script>
+</body>
+</html>

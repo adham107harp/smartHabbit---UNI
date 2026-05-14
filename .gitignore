@@ -1,0 +1,55 @@
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+
+# --- Build output ---
+dist/
+build/
+*.tsbuildinfo
+.cache/
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+*.local
+
+# --- Logs & runtime ---
+*.log
+logs/
+pids/
+*.pid
+*.seed
+
+# --- Editor / OS ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Test coverage ---
+coverage/
+.nyc_output/
+
+# --- Local DB / data ---
+*.sqlite
+*.sqlite3
+*.db
+data/
+
+# --- Uploads (don't ship user data) ---
+backend/uploads/
+
+# --- Misc ---
+*.bak
+*.tmp
+.tmp/

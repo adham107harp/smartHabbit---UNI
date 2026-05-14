@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log in · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-body">
+  <div class="auth-wrap">
+    <aside class="auth-aside">
+      <a class="brand" href="index.html">
+        <span class="brand-logo"><i class="fa-solid fa-bolt"></i></span>
+        <span>SmartHabbit</span>
+      </a>
+      <div class="auth-aside-content">
+        <h1>Welcome back.</h1>
+        <p>Pick up your streak right where you left off. Every day counts.</p>
+        <ul class="auth-points">
+          <li><i class="fa-solid fa-circle-check"></i> Track unlimited habits</li>
+          <li><i class="fa-solid fa-circle-check"></i> Earn XP, coins, and badges</li>
+          <li><i class="fa-solid fa-circle-check"></i> Climb the leaderboard</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="auth-main">
+      <div class="auth-card">
+        <h2>Log in to your account</h2>
+        <p class="auth-sub">Don't have one yet? <a href="register.html">Create an account</a></p>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+            <span class="field-error" data-error-for="email"></span>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-wrap">
+              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required>
+              <button type="button" class="password-toggle" aria-label="Show password">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            <span class="field-error" data-error-for="password"></span>
+          </div>
+
+          <div class="auth-row">
+            <label class="checkbox">
+              <input type="checkbox" id="remember">
+              <span>Remember me</span>
+            </label>
+            <a class="link" href="forgot-password.html">Forgot password?</a>
+          </div>
+
+          <button class="btn btn-primary btn-block btn-lg" type="submit" id="login-submit">
+            <span class="btn-text">Log in</span>
+            <span class="spinner hidden" data-spinner></span>
+          </button>
+
+          <p class="auth-error" id="form-error" hidden></p>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script>auth.initLogin();</script>
+</body>
+</html>

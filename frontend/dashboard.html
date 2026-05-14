@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <section class="dash-hero card">
+          <div class="dash-hero-left">
+            <h1 class="page-title">Welcome back, <span data-username>...</span></h1>
+            <p class="page-subtitle">Here's how today's looking. Let's keep the streak going.</p>
+            <div class="dash-level">
+              <div class="dash-level-info">
+                <strong>Level <span data-level>1</span></strong>
+                <span class="text-muted">· <span data-xp-current>0</span> / <span data-xp-next>100</span> XP</span>
+              </div>
+              <div class="progress mt-2">
+                <div class="progress-fill" data-xp-bar style="width:0%"></div>
+              </div>
+              <small class="text-muted mt-2" data-xp-toggo>0 XP to next level</small>
+            </div>
+          </div>
+          <div class="dash-hero-right">
+            <div class="stat-tile">
+              <i class="fa-solid fa-fire"></i>
+              <div>
+                <strong data-streak>0</strong>
+                <span>Day streak</span>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <i class="fa-solid fa-coins"></i>
+              <div>
+                <strong data-coins>0</strong>
+                <span>Coins</span>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <i class="fa-solid fa-medal"></i>
+              <div>
+                <strong data-badge-count>0</strong>
+                <span>Badges earned</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="dash-grid">
+          <section class="card dash-habits">
+            <div class="card-header">
+              <h2 class="card-title">Today's habits</h2>
+              <a class="btn btn-secondary btn-sm" href="habits.html">
+                <i class="fa-solid fa-plus"></i> New habit
+              </a>
+            </div>
+            <div data-habits-list>
+              <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+          </section>
+
+          <section class="card dash-side">
+            <div class="card-header">
+              <h2 class="card-title">Recent badges</h2>
+              <a class="btn btn-ghost btn-sm" href="badges.html">View all</a>
+            </div>
+            <div data-recent-badges>
+              <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+
+            <div class="card-header mt-5">
+              <h2 class="card-title">Active challenges</h2>
+              <a class="btn btn-ghost btn-sm" href="challenges.html">More</a>
+            </div>
+            <div data-active-challenges>
+              <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

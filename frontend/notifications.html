@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/notifications.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Notifications</h1>
+            <p class="page-subtitle">Catch up on every level-up, badge unlock, and challenge update.</p>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary btn-sm" id="mark-all-read">
+              <i class="fa-regular fa-circle-check"></i> Mark all read
+            </button>
+            <button class="btn btn-ghost btn-sm" id="clear-all">
+              <i class="fa-regular fa-trash-can"></i> Clear all
+            </button>
+          </div>
+        </div>
+
+        <section class="card">
+          <div data-notif-list>
+            <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/notifications.js"></script>
+</body>
+</html>

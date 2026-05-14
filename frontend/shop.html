@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/shop.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Reward shop</h1>
+            <p class="page-subtitle">Spend your coins on themes, frames, and boosts you've earned.</p>
+          </div>
+          <div class="shop-balance">
+            <i class="fa-solid fa-coins"></i>
+            <strong data-shop-coins>0</strong>
+            <span>coins available</span>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-type="all">All</button>
+          <button class="tab" data-type="theme">Themes</button>
+          <button class="tab" data-type="avatar_item">Avatar frames</button>
+          <button class="tab" data-type="consumable">Boosts</button>
+          <button class="tab" data-type="badge">Badges</button>
+          <button class="tab" data-type="owned">My inventory</button>
+        </div>
+
+        <div class="shop-grid" data-shop-grid>
+          <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/shop.js"></script>
+</body>
+</html>
