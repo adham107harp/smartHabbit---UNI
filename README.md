@@ -8,8 +8,8 @@ This is a university project. The whole thing — backend and frontend — runs 
 
 | Layer | Tech |
 |---|---|
-| **Frontend** | Plain HTML + CSS + JavaScript (no framework). One folder per file type. |
-| **Backend** | Node.js + Express + TypeScript + socket.io (real-time chat) |
+| **Frontend** | Plain HTML + CSS + JavaScript |
+| **Backend** | Node.js + Express + TypeScript + socket.io  |
 | **Database** | PostgreSQL 16 |
 | **Auth** | JWT (access + refresh tokens) + bcrypt |
 | **Tests** | jest + supertest (integration tests against a scratch Postgres DB) |
