@@ -1,5 +1,7 @@
+import { Pool, PoolClient } from 'pg';
 import { db } from '../config/database';
-import { Pool } from 'pg';
+
+type Querier = Pick<PoolClient, 'query'>;
 
 export interface BadgeInfo {
   id: string;
@@ -21,153 +23,108 @@ export class BadgeService {
   private pool: Pool = db.getPool();
 
   /**
-   * Check and award badges when criteria are met
+   * Check and award badges when criteria are met.
+   * Pass `client` to participate in an outer transaction.
+   *
+   * v4 perf: previously made one SELECT per badge (N+1 with ~50 badges per
+   * habit log). Now fetches every stat once up front and evaluates the
+   * criteria against the in-memory snapshot, so awarding 50 badges is 2
+   * queries + N inserts instead of 1 + N*1 + N inserts.
    */
-  async checkAndAwardBadges(userId: string): Promise<AwardedBadge[]> {
-    return await db.transaction(async (client) => {
-      // Get all badges user doesn't have yet
-      const unearnedBadgesResult = await client.query(
+  async checkAndAwardBadges(userId: string, client?: PoolClient): Promise<AwardedBadge[]> {
+    const run = async (q: Querier): Promise<AwardedBadge[]> => {
+      // One round-trip for everything badge criteria might check.
+      const statsRow = (await q.query(
+        `SELECT u.xp,
+                u.level,
+                u.max_streak,
+                u.current_streak,
+                (SELECT COUNT(*)::int FROM habit_logs WHERE user_id = u.id)                                   AS completions,
+                (SELECT COUNT(*)::int FROM user_challenges WHERE user_id = u.id AND status = 'completed')    AS challenges_completed
+           FROM users u
+          WHERE u.id = $1`,
+        [userId]
+      )).rows[0];
+
+      if (!statsRow) return [];
+
+      const unearnedBadgesResult = await q.query(
         `SELECT b.* FROM badges b
-         WHERE b.id NOT IN (
-           SELECT badge_id FROM user_badges WHERE user_id = $1
-         )`,
+          WHERE b.id NOT IN (SELECT badge_id FROM user_badges WHERE user_id = $1)`,
         [userId]
       );
 
-      const badgesToEvaluate = unearnedBadgesResult.rows;
       const awardedBadges: AwardedBadge[] = [];
+      let bonusXp = 0;
+      let bonusCoins = 0;
 
-      for (const badge of badgesToEvaluate) {
-        const isEarned = await this.checkBadgeCriteria(
-          userId,
-          badge.criteria_type,
-          badge.criteria_value,
-          client
-        );
-
-        if (isEarned) {
-          await this.awardBadge(userId, badge.id, client);
-          awardedBadges.push({
-            badgeId: badge.id,
-            badgeName: badge.name,
-            xpBonus: badge.bonus_xp || 0,
-            coinsBonus: badge.bonus_coins || 0
-          });
-
-          // Award bonus XP and coins
-          if (badge.bonus_xp || badge.bonus_coins) {
-            await client.query(
-              `UPDATE users 
-               SET xp = xp + $1, coins = coins + $2, updated_at = NOW() 
-               WHERE id = $3`,
-              [badge.bonus_xp || 0, badge.bonus_coins || 0, userId]
-            );
-          }
+      for (const badge of unearnedBadgesResult.rows) {
+        if (!this.meetsCriteria(badge.criteria_type, badge.criteria_value, statsRow)) {
+          continue;
         }
+        await this.awardBadge(userId, badge.id, q);
+        awardedBadges.push({
+          badgeId: badge.id,
+          badgeName: badge.name,
+          xpBonus: badge.bonus_xp || 0,
+          coinsBonus: badge.bonus_coins || 0
+        });
+        bonusXp += badge.bonus_xp || 0;
+        bonusCoins += badge.bonus_coins || 0;
+      }
+
+      // Coalesced bonus payout — one UPDATE instead of one per awarded badge.
+      if (bonusXp > 0 || bonusCoins > 0) {
+        await q.query(
+          `UPDATE users
+              SET xp = xp + $1, coins = coins + $2, updated_at = NOW()
+            WHERE id = $3`,
+          [bonusXp, bonusCoins, userId]
+        );
       }
 
       return awardedBadges;
-    });
+    };
+
+    if (client) return run(client);
+    return db.transaction(async (c) => run(c));
   }
 
   /**
-   * Check if badge criteria are met
+   * Pure helper: does this badge's criteria match the cached stats?
+   * No I/O — keeps the awarding loop tight.
    */
-  private async checkBadgeCriteria(
-    userId: string,
-    criteriaType: string,
-    criteriaValue: number,
-    client: any
-  ): Promise<boolean> {
-    switch (criteriaType) {
-      case 'streak':
-        return await this.checkStreakCriteria(userId, criteriaValue, client);
-      case 'total_xp':
-        return await this.checkTotalXPCriteria(userId, criteriaValue, client);
-      case 'completions':
-        return await this.checkCompletionsCriteria(userId, criteriaValue, client);
-      default:
-        return false;
+  private meetsCriteria(
+    type: string,
+    value: number,
+    stats: { xp: number; level: number; max_streak: number; completions: number; challenges_completed: number }
+  ): boolean {
+    switch (type) {
+      case 'streak':               return stats.max_streak >= value;
+      case 'total_xp':             return stats.xp >= value;
+      case 'completions':          return stats.completions >= value;
+      case 'level':                return stats.level >= value;
+      case 'challenges_completed': return stats.challenges_completed >= value;
+      default:                     return false;
     }
   }
 
-  /**
-   * Check streak criteria
-   */
-  private async checkStreakCriteria(
-    userId: string,
-    requiredStreak: number,
-    client: any
-  ): Promise<boolean> {
-    const result = await client.query(
-      'SELECT max_streak FROM users WHERE id = $1',
-      [userId]
-    );
-
-    if (result.rows.length === 0) return false;
-    return result.rows[0].max_streak >= requiredStreak;
-  }
-
-  /**
-   * Check total XP criteria
-   */
-  private async checkTotalXPCriteria(
-    userId: string,
-    requiredXP: number,
-    client: any
-  ): Promise<boolean> {
-    const result = await client.query(
-      'SELECT xp FROM users WHERE id = $1',
-      [userId]
-    );
-
-    if (result.rows.length === 0) return false;
-    return result.rows[0].xp >= requiredXP;
-  }
-
-  /**
-   * Check completion count criteria
-   */
-  private async checkCompletionsCriteria(
-    userId: string,
-    requiredCompletions: number,
-    client: any
-  ): Promise<boolean> {
-    const result = await client.query(
-      `SELECT COUNT(*) as completion_count 
-       FROM habit_logs 
-       WHERE user_id = $1`,
-      [userId]
-    );
-
-    if (result.rows.length === 0) return false;
-    return parseInt(result.rows[0].completion_count) >= requiredCompletions;
-  }
-
-  /**
-   * Award badge to user
-   */
-  private async awardBadge(
-    userId: string,
-    badgeId: string,
-    client: any
-  ): Promise<void> {
-    await client.query(
+  private async awardBadge(userId: string, badgeId: string, q: Querier): Promise<void> {
+    await q.query(
       `INSERT INTO user_badges (user_id, badge_id, earned_at)
        VALUES ($1, $2, NOW())
        ON CONFLICT DO NOTHING`,
       [userId, badgeId]
     );
 
-    // Create notification for badge unlock
-    await client.query(
+    await q.query(
       `INSERT INTO notifications (user_id, title, message, type, related_badge_id)
-       SELECT $1, 
+       SELECT $1,
               '🏆 Achievement Unlocked!',
               'You earned the "' || b.name || '" badge!',
               'badge_earned',
               $2
-       FROM badges b WHERE b.id = $2`,
+         FROM badges b WHERE b.id = $2`,
       [userId, badgeId]
     );
   }

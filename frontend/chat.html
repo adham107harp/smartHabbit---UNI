@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/chat.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page chat-page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Chat</h1>
+            <p class="page-subtitle">Message your friends in real time.</p>
+          </div>
+          <div class="chat-status" data-chat-status>
+            <span class="chat-status-dot"></span>
+            <span data-chat-status-label>Connecting…</span>
+          </div>
+        </div>
+
+        <section class="chat-layout card">
+          <aside class="chat-sidebar">
+            <div class="chat-sidebar-head">
+              <strong>Friends</strong>
+              <a class="btn btn-ghost btn-sm" href="friends.html">
+                <i class="fa-solid fa-user-plus"></i>
+              </a>
+            </div>
+            <div class="chat-conversations" data-conversations>
+              <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+          </aside>
+
+          <section class="chat-thread" data-thread>
+            <div class="chat-empty" data-empty>
+              <i class="fa-regular fa-comments"></i>
+              <h3>Pick a friend to start chatting</h3>
+              <p>If your list is empty, head to <a href="friends.html">Friends</a> first.</p>
+            </div>
+
+            <header class="chat-header hidden" data-thread-header>
+              <div class="chat-avatar" data-thread-avatar>?</div>
+              <div class="chat-thread-info">
+                <strong data-thread-name>…</strong>
+                <small data-thread-status>offline</small>
+              </div>
+            </header>
+
+            <div class="chat-messages" data-messages></div>
+
+            <form class="chat-input hidden" data-input-form>
+              <input
+                type="text"
+                placeholder="Type a message…"
+                maxlength="1000"
+                autocomplete="off"
+                data-input>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </form>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- socket.io client from CDN -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+  <script src="js/sound.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

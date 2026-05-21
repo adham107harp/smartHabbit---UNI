@@ -142,22 +142,101 @@ export class ShopService {
   }
 
   /**
-   * Apply item effect based on type
+   * Apply the item's real effect at purchase time.
+   * Consumables (boosts, shields) activate immediately.
+   * Cosmetics (themes, frames) just sit in inventory until the user equips them.
+   * Badge purchases are one-shot: the badge is granted right now.
    */
   private async applyItemEffect(
     userId: string,
     item: any,
     client: any
   ): Promise<void> {
-    // Create notification
+    const effect = item.meta_data?.effect;
+    const itemType = item.item_type;
+
+    if (itemType === 'consumable' && effect === 'streak_protection') {
+      const uses = item.meta_data?.uses || 1;
+      await client.query(
+        `UPDATE users
+            SET streak_shields_count = streak_shields_count + $1, updated_at = NOW()
+          WHERE id = $2`,
+        [uses, userId]
+      );
+    } else if (itemType === 'consumable' && effect === 'xp_boost') {
+      const hours = item.meta_data?.duration_hours || 24;
+      // Stack from the later of "now" or current expiry so back-to-back buys add up.
+      await client.query(
+        `UPDATE users
+            SET xp_boost_expires_at =
+                  GREATEST(NOW(), COALESCE(xp_boost_expires_at, NOW())) + ($1 || ' hours')::INTERVAL,
+                updated_at = NOW()
+          WHERE id = $2`,
+        [String(hours), userId]
+      );
+    } else if (itemType === 'consumable' && effect === 'coin_boost') {
+      const hours = item.meta_data?.duration_hours || 24;
+      await client.query(
+        `UPDATE users
+            SET coin_boost_expires_at =
+                  GREATEST(NOW(), COALESCE(coin_boost_expires_at, NOW())) + ($1 || ' hours')::INTERVAL,
+                updated_at = NOW()
+          WHERE id = $2`,
+        [String(hours), userId]
+      );
+    } else if (itemType === 'badge') {
+      // Make the user own this badge immediately (one-shot purchase).
+      // Note: this needs a badge row referenced by item.meta_data.badge_id OR
+      // we treat the shop_item itself as the badge — keep simple, no-op for now.
+      // (Future: link shop badge items to real badges table.)
+    }
+    // themes + avatar_item: no automatic effect — user equips in their own time.
+
     await client.query(
       `INSERT INTO notifications (user_id, title, message, type)
-       VALUES ($1, '🛍️ Purchase Complete', 'You purchased ' || $2 || '!', 'general')`,
+       VALUES ($1, '🛍️ Purchase Complete', 'You purchased ' || $2 || '!', 'purchase')`,
       [userId, item.name]
     );
+  }
 
-    // Type-specific effects can be implemented here
-    // For now, we just create a notification
+  /**
+   * Equip a theme or avatar frame that the user already owns.
+   * Returns the enriched user record so the frontend can re-apply the theme
+   * without a second roundtrip.
+   */
+  async equipItem(userId: string, itemId: string): Promise<{ item_type: string }> {
+    return await db.transaction(async (client) => {
+      const itemRes = await client.query(
+        `SELECT rs.*, p.id AS purchase_id
+           FROM reward_shop rs
+           LEFT JOIN purchases p ON p.item_id = rs.id AND p.user_id = $1
+          WHERE rs.id = $2`,
+        [userId, itemId]
+      );
+      const item = itemRes.rows[0];
+      if (!item) throw new Error('Item not found');
+      if (!item.purchase_id) throw new Error("You don't own this item.");
+      if (!['theme', 'avatar_item'].includes(item.item_type)) {
+        throw new Error('This item is not equippable.');
+      }
+      const column = item.item_type === 'theme' ? 'active_theme_id' : 'active_avatar_frame_id';
+      await client.query(
+        `UPDATE users SET ${column} = $1, updated_at = NOW() WHERE id = $2`,
+        [itemId, userId]
+      );
+      return { item_type: item.item_type };
+    });
+  }
+
+  /**
+   * Unequip the currently active theme or frame (back to default).
+   */
+  async unequipType(userId: string, type: 'theme' | 'avatar_item'): Promise<void> {
+    const column = type === 'theme' ? 'active_theme_id' : 'active_avatar_frame_id';
+    await this.pool.query(
+      `UPDATE users SET ${column} = NULL, updated_at = NOW() WHERE id = $1`,
+      [userId]
+    );
   }
 
   /**

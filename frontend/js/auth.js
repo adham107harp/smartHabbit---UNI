@@ -167,7 +167,9 @@
           refreshToken: data.refreshToken,
           user: data.user
         });
-        location.replace('dashboard.html');
+        // First-time accounts go through the welcome flow; it self-redirects
+        // to the dashboard if onboarded_at is already set.
+        location.replace('welcome.html');
       } catch (err) {
         const msg = err.status === 409
           ? 'That username or email is already taken.'

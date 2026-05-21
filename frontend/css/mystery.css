@@ -1,0 +1,93 @@
+/* Mystery box modal — level-milestone celebration. */
+
+.mystery-modal {
+  text-align: center;
+  padding: var(--sp-3) var(--sp-2);
+}
+
+.mystery-chest {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto var(--sp-4);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 64px;
+  color: white;
+  background: linear-gradient(135deg, #ffd700 0%, #ff6b3d 60%, #be185d 100%);
+  box-shadow: 0 0 60px rgba(255, 138, 76, 0.55), inset 0 0 25px rgba(255, 255, 255, 0.4);
+  animation: chest-wiggle 1.8s ease-in-out infinite;
+}
+
+.mystery-chest.opened {
+  animation: chest-pop 0.6s ease forwards;
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  box-shadow: 0 0 80px rgba(67, 233, 123, 0.6);
+}
+
+@keyframes chest-wiggle {
+  0%, 100% { transform: rotate(-3deg) scale(1); }
+  25%      { transform: rotate(3deg)  scale(1.04); }
+  50%      { transform: rotate(-3deg) scale(1); }
+  75%      { transform: rotate(3deg)  scale(1.04); }
+}
+
+@keyframes chest-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.mystery-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: var(--sp-2);
+  background: linear-gradient(135deg, #ffd700, #ff6b3d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mystery-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: var(--sp-5);
+}
+
+.mystery-reward {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-5) var(--sp-4);
+  margin-bottom: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.mystery-reward i {
+  font-size: 40px;
+  color: var(--accent-gold);
+  margin-bottom: var(--sp-2);
+}
+
+.mystery-reward strong {
+  font-size: 24px;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mystery-reward p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.mystery-actions {
+  display: flex;
+  gap: var(--sp-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}

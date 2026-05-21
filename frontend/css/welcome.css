@@ -1,0 +1,161 @@
+/* Welcome / onboarding flow. */
+
+.welcome-body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-5) var(--sp-4);
+}
+
+.welcome-shell {
+  width: 100%;
+  max-width: 720px;
+}
+
+.welcome-progress {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-5);
+}
+
+.welcome-progress-dot {
+  width: 32px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  transition: background var(--t-base), width var(--t-base);
+}
+
+.welcome-progress-dot.is-active {
+  background: var(--primary-gradient);
+  width: 56px;
+}
+
+.welcome-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-6) var(--sp-5);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
+}
+
+.welcome-card h1 {
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-3);
+}
+.welcome-card > p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-5);
+}
+
+.welcome-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+}
+
+.welcome-feature {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+}
+
+.welcome-feature i {
+  font-size: 24px;
+  display: block;
+  margin-bottom: var(--sp-2);
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-feature strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.welcome-feature p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.welcome-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+}
+
+.welcome-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  text-align: center;
+}
+
+.welcome-pick i {
+  font-size: 28px;
+  color: var(--text-secondary);
+  transition: color var(--t-fast);
+}
+
+.welcome-pick.is-selected {
+  border-color: #8b9bff;
+  background: var(--surface-3);
+}
+
+.welcome-pick.is-selected i {
+  color: var(--text-primary);
+}
+
+.welcome-pick:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
+.welcome-pick strong { font-size: 14px; }
+
+.welcome-rec {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-2);
+  cursor: pointer;
+}
+
+.welcome-rec input { width: 18px; height: 18px; accent-color: #8b9bff; }
+
+.welcome-rec strong { font-size: 14px; display: block; }
+.welcome-rec small { color: var(--text-muted); font-size: 12px; }
+.welcome-rec .diff-badge { font-size: 10px; }
+
+.welcome-actions {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.welcome-actions .btn { flex: 1; min-width: 140px; }

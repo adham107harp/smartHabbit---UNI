@@ -117,8 +117,42 @@
     return json.data ?? json;
   }
 
+  /**
+   * Multipart upload helper. Pass a `File` (from a <input type=file>) and
+   * we POST it as FormData. No Content-Type header — fetch sets the boundary.
+   */
+  async function upload(path, file, fieldName = 'avatar', opts = {}) {
+    const formData = new FormData();
+    formData.append(fieldName, file);
+
+    const headers = { ...(opts.headers || {}) };
+    const token = getAccess();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    let res = await fetch(BASE_URL + path, { method: 'POST', headers, body: formData });
+
+    if (res.status === 401 && getRefresh() && !opts.isRetry) {
+      try {
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          headers['Authorization'] = 'Bearer ' + newToken;
+          res = await fetch(BASE_URL + path, { method: 'POST', headers, body: formData });
+        }
+      } catch {
+        clearTokens();
+        location.replace('login.html');
+        throw new ApiError('Session expired', 401, 'SESSION_EXPIRED');
+      }
+    }
+
+    if (!res.ok) throw await parseError(res);
+    const json = await res.json();
+    return json.data ?? json;
+  }
+
   const api = {
     BASE_URL,
+    API_ORIGIN: global.SMARTHABBIT_API_URL || 'http://localhost:3000',
     isAuthed,
     getCachedUser,
     setTokens,
@@ -128,7 +162,8 @@
     post:   (path, body, opts) => request('POST',   path, body, opts),
     put:    (path, body, opts) => request('PUT',    path, body, opts),
     patch:  (path, body, opts) => request('PATCH',  path, body, opts),
-    delete: (path, opts) => request('DELETE', path, null, opts)
+    delete: (path, opts) => request('DELETE', path, null, opts),
+    upload
   };
 
   global.api = api;

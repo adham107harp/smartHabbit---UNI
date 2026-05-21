@@ -1,70 +1,169 @@
+import { Pool, PoolClient } from 'pg';
 import { db } from '../config/database';
-import { Pool } from 'pg';
+
+type Querier = Pick<PoolClient, 'query'>;
 
 export interface StreakUpdate {
   userId: string;
   newStreak: number;
   maxStreak: number;
   streakBroken: boolean;
+  shieldUsed: boolean;
+  /** True when this update was a no-op because not every daily habit is
+   *  done yet today. The streak counter is unchanged in that case. */
+  pendingTodayCompletion: boolean;
+}
+
+/**
+ * Returns true iff EVERY active daily habit for the user has hit its
+ * target_value (via SUM of habit_logs.value) for the given date.
+ * If the user has zero active daily habits the answer is false — we don't
+ * want a habit-less user to magically grow a streak.
+ */
+export async function allDailyHabitsDone(
+  q: Querier,
+  userId: string,
+  dateExpr: string = 'CURRENT_DATE'
+): Promise<boolean> {
+  const row = (await q.query(
+    `WITH user_daily AS (
+       SELECT id, target_value
+         FROM habits
+        WHERE user_id = $1
+          AND deleted_at IS NULL
+          AND is_active
+          AND goal_type = 'daily'
+     ),
+     done AS (
+       SELECT h.id
+         FROM user_daily h
+        WHERE COALESCE((
+                SELECT SUM(value)
+                  FROM habit_logs
+                 WHERE habit_id = h.id
+                   AND user_id  = $1
+                   AND logged_date = ${dateExpr}
+              ), 0) >= h.target_value
+     )
+     SELECT (SELECT COUNT(*) FROM user_daily) AS total,
+            (SELECT COUNT(*) FROM done)       AS done`,
+    [userId]
+  )).rows[0];
+  const total = Number(row.total);
+  const done = Number(row.done);
+  return total > 0 && done === total;
 }
 
 export class StreakService {
   private pool: Pool = db.getPool();
 
   /**
-   * Update streak count - called when habit is logged
+   * Update streak count.
+   * Pass `client` to run inside an outer transaction; otherwise it opens its own.
+   *
+   * Streak shield: if the user missed yesterday and has a shield, the shield
+   * is consumed (count -= 1) and the streak is preserved instead of reset.
    */
-  async updateStreak(userId: string): Promise<StreakUpdate> {
-    return await db.transaction(async (client) => {
-      // Get last habit log date for this user
-      const lastLogResult = await client.query(
-        `SELECT MAX(logged_date) as last_logged_date 
-         FROM habit_logs 
-         WHERE user_id = $1`,
+  async updateStreak(userId: string, client?: PoolClient): Promise<StreakUpdate> {
+    const run = async (q: Querier): Promise<StreakUpdate> => {
+      // v5 rule: streak only ticks when ALL daily habits are done for today.
+      // If today isn't fully done yet, this call is a no-op — we leave the
+      // streak counter unchanged and let last_active_at carry the freshness.
+      const userResult = await q.query(
+        `SELECT current_streak, max_streak, streak_shields_count,
+                last_streak_date,
+                last_streak_date = CURRENT_DATE AS already_bumped_today
+           FROM users WHERE id = $1`,
         [userId]
       );
-
-      const lastLoggedDate = lastLogResult.rows[0]?.last_logged_date;
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-      const userResult = await client.query(
-        'SELECT current_streak, max_streak FROM users WHERE id = $1',
-        [userId]
-      );
-
       const user = userResult.rows[0];
-      let newStreak = user.current_streak;
-      let streakBroken = false;
 
-      if (lastLoggedDate === today) {
-        // Already logged today, no change
-        newStreak = user.current_streak;
-      } else if (lastLoggedDate === yesterday) {
-        // Consecutive day - increment streak
-        newStreak = user.current_streak + 1;
-      } else {
-        // Streak broken
-        newStreak = 1;
-        streakBroken = user.current_streak > 0;
+      // last_active_at always touches — punishment job needs an accurate
+      // "user did something" timestamp regardless of streak.
+      await q.query(
+        'UPDATE users SET last_active_at = NOW(), updated_at = NOW() WHERE id = $1',
+        [userId]
+      );
+
+      // Idempotency: if we already credited the streak for today, never
+      // bump it again, regardless of how many habits get logged later.
+      if (user.already_bumped_today) {
+        return {
+          userId,
+          newStreak: user.current_streak,
+          maxStreak: user.max_streak,
+          streakBroken: false,
+          shieldUsed: false,
+          pendingTodayCompletion: false
+        };
       }
 
-      // Update user streak
-      const maxStreak = Math.max(user.max_streak, newStreak);
+      const todayAllDone = await allDailyHabitsDone(q, userId, 'CURRENT_DATE');
+      if (!todayAllDone) {
+        return {
+          userId,
+          newStreak: user.current_streak,
+          maxStreak: user.max_streak,
+          streakBroken: false,
+          shieldUsed: false,
+          pendingTodayCompletion: true
+        };
+      }
 
-      await client.query(
-        `UPDATE users 
-         SET current_streak = $1, max_streak = $2, updated_at = NOW() 
-         WHERE id = $3`,
+      // Today is fully done. Did the streak already account for it? We
+      // detect "the user just completed today" by checking: was today's
+      // streak credit already counted? We approximate this with the
+      // "did yesterday's all-done qualify too?" check — a clean transition.
+      //
+      // Use SQL date math so timezone doesn't drift the comparison.
+      const yesterdayAllDone = await allDailyHabitsDone(q, userId, "(CURRENT_DATE - INTERVAL '1 day')");
+
+      let newStreak: number;
+      let streakBroken = false;
+      let shieldUsed = false;
+
+      if (yesterdayAllDone) {
+        // Two consecutive full-completion days → extend.
+        newStreak = user.current_streak + 1;
+      } else if (user.streak_shields_count > 0 && user.current_streak > 0) {
+        // Yesterday wasn't fully done but the user already had a streak.
+        // Spend a shield to keep it alive (one-day grace).
+        shieldUsed = true;
+        newStreak = user.current_streak + 1;
+        await q.query(
+          'UPDATE users SET streak_shields_count = streak_shields_count - 1 WHERE id = $1',
+          [userId]
+        );
+        await q.query(
+          `INSERT INTO notifications (user_id, title, message, type)
+           VALUES ($1, '🛡️ Streak Shield Used',
+                   'Your streak shield saved your streak. It''s still alive!',
+                   'general')`,
+          [userId]
+        );
+      } else {
+        // New streak starting today.
+        newStreak = 1;
+        streakBroken = user.current_streak > 0 && user.current_streak !== 1;
+      }
+
+      // Always stamp today as bumped so subsequent logs same day skip.
+      const maxStreak = Math.max(user.max_streak, newStreak);
+      await q.query(
+        `UPDATE users
+            SET current_streak = $1,
+                max_streak = $2,
+                last_streak_date = CURRENT_DATE,
+                updated_at = NOW()
+          WHERE id = $3`,
         [newStreak, maxStreak, userId]
       );
 
-      // Check for streak milestone badges
       const streakMilestones = [7, 30, 100, 365];
       if (streakMilestones.includes(newStreak)) {
-        await client.query(
+        await q.query(
           `INSERT INTO notifications (user_id, title, message, type)
-           VALUES ($1, '🔥 Streak Milestone!', 'You reached a ' || $2 || '-day streak!', 'general')`,
+           VALUES ($1, '🔥 Streak Milestone!', 'You reached a ' || $2 || '-day streak!', 'streak_milestone')`,
           [userId, newStreak]
         );
       }
@@ -72,10 +171,15 @@ export class StreakService {
       return {
         userId,
         newStreak,
-        maxStreak,
-        streakBroken
+        maxStreak: Math.max(user.max_streak, newStreak),
+        streakBroken,
+        shieldUsed,
+        pendingTodayCompletion: false
       };
-    });
+    };
+
+    if (client) return run(client);
+    return db.transaction(async (c) => run(c));
   }
 
   /**

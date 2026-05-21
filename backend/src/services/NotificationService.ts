@@ -126,13 +126,20 @@ export class NotificationService {
   }
 
   /**
-   * Mark notification as read
+   * Mark a single notification read.
+   * Scoped to the owner — returns false if the row didn't belong to userId
+   * (or didn't exist). Callers should map false → 404 so attackers can't
+   * enumerate notification IDs.
    */
-  async markAsRead(notificationId: string): Promise<void> {
-    await this.pool.query(
-      `UPDATE notifications SET is_read = true WHERE id = $1`,
-      [notificationId]
+  async markAsRead(notificationId: string, userId: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `UPDATE notifications
+          SET is_read = true
+        WHERE id = $1 AND user_id = $2
+      RETURNING id`,
+      [notificationId, userId]
     );
+    return (result.rowCount ?? 0) > 0;
   }
 
   /**
@@ -149,13 +156,17 @@ export class NotificationService {
   }
 
   /**
-   * Delete notification
+   * Delete a notification.
+   * Same ownership scoping as markAsRead — returns false if not the user's.
    */
-  async deleteNotification(notificationId: string): Promise<void> {
-    await this.pool.query(
-      `DELETE FROM notifications WHERE id = $1`,
-      [notificationId]
+  async deleteNotification(notificationId: string, userId: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `DELETE FROM notifications
+        WHERE id = $1 AND user_id = $2
+      RETURNING id`,
+      [notificationId, userId]
     );
+    return (result.rowCount ?? 0) > 0;
   }
 
   /**

@@ -33,6 +33,48 @@
     }, timeout);
   }
 
+  /**
+   * actionToast — a sticky toast with a clickable button (e.g. "Undo").
+   * Returns a handle: { dismiss() } so callers can close it after the action.
+   * Auto-dismisses after `timeout` ms (default 60s for log undo).
+   */
+  function actionToast(message, actionLabel, onAction, type = 'success', timeout = 60000) {
+    const container = ensureToastContainer();
+    const el = document.createElement('div');
+    el.className = `toast toast-${type} toast-actionable`;
+    const icon = type === 'success' ? 'fa-circle-check'
+              : type === 'error'   ? 'fa-circle-exclamation'
+              :                      'fa-circle-info';
+    el.innerHTML = `
+      <i class="fa-solid ${icon}"></i>
+      <span>${escapeHtml(message)}</span>
+      <button type="button" class="toast-action">${escapeHtml(actionLabel)}</button>
+    `;
+    container.appendChild(el);
+
+    const dismiss = () => {
+      if (!el.parentElement) return;
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(40px)';
+      el.style.transition = 'opacity 0.25s, transform 0.25s';
+      setTimeout(() => el.remove(), 250);
+    };
+
+    el.querySelector('.toast-action').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        await onAction();
+      } finally {
+        dismiss();
+      }
+    });
+
+    setTimeout(dismiss, timeout);
+    return { dismiss };
+  }
+
   /* ---------- Modal ---------- */
   function ensureModalBackdrop() {
     let b = document.querySelector('.modal-backdrop');
@@ -64,6 +106,42 @@
     }
   }
 
+  /* ---------- Unread-count poll (v5: notification sound) ----------
+     Polls /notifications/unread/count every 30s. If the count rises
+     between two polls, plays sound.play('notification') and updates the
+     bell badge. We don't fire on the FIRST poll because we don't know
+     whether the count was already that high before the user looked.
+     Only one poller per page; cleared on page unload.
+  */
+  let _unreadPoll = null;
+  let _lastUnread = 0;
+  function startUnreadPoll(initialCount) {
+    if (_unreadPoll) return; // already polling
+    _lastUnread = initialCount;
+    _unreadPoll = setInterval(async () => {
+      try {
+        const counts = await api.get('/notifications/unread/count');
+        const c = counts.count ?? counts.unreadCount ?? counts;
+        if (typeof c !== 'number') return;
+        const el = document.querySelector('[data-topbar]');
+        const dot = el?.querySelector('[data-tb-unread]');
+        if (dot) {
+          if (c > 0) {
+            dot.textContent = c > 99 ? '99+' : String(c);
+            dot.classList.add('visible');
+          } else {
+            dot.classList.remove('visible');
+          }
+        }
+        if (c > _lastUnread && window.sound) sound.play('notification');
+        _lastUnread = c;
+      } catch { /* ignore network blips */ }
+    }, 30_000);
+    window.addEventListener('beforeunload', () => {
+      if (_unreadPoll) clearInterval(_unreadPoll);
+    }, { once: true });
+  }
+
   /* ---------- Sidebar ---------- */
   const NAV_ITEMS = [
     { href: 'dashboard.html',     icon: 'fa-house',           label: 'Dashboard' },
@@ -73,6 +151,7 @@
     { href: 'shop.html',          icon: 'fa-bag-shopping',    label: 'Shop' },
     { href: 'leaderboard.html',   icon: 'fa-ranking-star',    label: 'Leaderboard' },
     { href: 'friends.html',       icon: 'fa-user-group',      label: 'Friends' },
+    { href: 'chat.html',          icon: 'fa-comments',        label: 'Chat' },
     { href: 'notifications.html', icon: 'fa-bell',            label: 'Notifications' },
     { href: 'profile.html',       icon: 'fa-user',            label: 'Profile' },
     { href: 'settings.html',      icon: 'fa-gear',            label: 'Settings' }
@@ -83,6 +162,16 @@
     if (!el) return;
     const currentPage = location.pathname.split('/').pop() || 'index.html';
     el.classList.add('sidebar');
+    // Admin link only renders for users whose cached /me has is_admin=true.
+    // We check both api.getCachedUser() now AND re-render after the topbar
+    // fetches a fresh /me so the link appears on first login too.
+    const cached = api.getCachedUser();
+    const adminLink = cached?.is_admin
+      ? `<a class="sidebar-link ${currentPage === 'admin.html' ? 'active' : ''}" href="admin.html">
+           <i class="fa-solid fa-shield-halved"></i>
+           <span class="label">Admin</span>
+         </a>`
+      : '';
     el.innerHTML = `
       <a class="sidebar-brand" href="dashboard.html">
         <span class="logo"><i class="fa-solid fa-bolt"></i></span>
@@ -95,6 +184,7 @@
             <span class="label">${item.label}</span>
           </a>
         `).join('')}
+        ${adminLink}
       </nav>
       <div class="sidebar-footer">
         <a class="sidebar-link" href="#" id="sidebar-logout">
@@ -123,6 +213,10 @@
         <span class="chip chip-level"><i class="fa-solid fa-star"></i> Lv <span data-tb-level>1</span></span>
         <span class="chip chip-coins"><i class="fa-solid fa-coins"></i> <span data-tb-coins>0</span></span>
         <span class="chip chip-streak"><i class="fa-solid fa-fire"></i> <span data-tb-streak>0</span></span>
+        <a class="bell" href="chat.html" title="Chat with friends">
+          <i class="fa-solid fa-comments"></i>
+          <span class="badge-dot" data-tb-chat-unread>0</span>
+        </a>
         <a class="bell" href="notifications.html" title="Notifications">
           <i class="fa-solid fa-bell"></i>
           <span class="badge-dot" data-tb-unread>0</span>
@@ -142,10 +236,13 @@
         const data = await api.get('/users/me');
         const user = data.user || data;
         applyUser(el, user);
-        // Persist refreshed user
         api.setTokens({ user });
+        // Re-render the sidebar if the cached user lacked is_admin but the
+        // fresh /me has it (first login after upgrade).
+        if (user.is_admin && !document.querySelector('[data-sidebar] a[href="admin.html"]')) {
+          renderSidebar();
+        }
       } catch (err) {
-        // Token might be stale — auth-guard handles redirect
         console.warn('topbar /users/me failed', err);
       }
       try {
@@ -156,7 +253,18 @@
           dot.textContent = c > 99 ? '99+' : String(c);
           dot.classList.add('visible');
         }
+        startUnreadPoll(typeof c === 'number' ? c : 0);
       } catch { /* ignore */ }
+
+      try {
+        const chat = await api.get('/chat/unread/count');
+        const c = chat.count ?? chat;
+        const dot = el.querySelector('[data-tb-chat-unread]');
+        if (dot && typeof c === 'number' && c > 0) {
+          dot.textContent = c > 99 ? '99+' : String(c);
+          dot.classList.add('visible');
+        }
+      } catch { /* ignore — endpoint not yet ready or no friends */ }
     }
   }
 
@@ -173,9 +281,75 @@
     const initial = (user.username || '?').charAt(0).toUpperCase();
     set('[data-tb-initial]',  initial);
     const av = root.querySelector('[data-tb-avatar]');
-    if (av && user.avatar_url) {
-      av.innerHTML = `<img src="${user.avatar_url}" alt="">`;
+    if (av) {
+      if (user.avatar_url) {
+        const src = absoluteMediaUrl(user.avatar_url);
+        av.innerHTML = `<img src="${src}" alt="">`;
+      } else {
+        av.innerHTML = `<span>${initial}</span>`;
+      }
+      applyFrameTo(av, user.active_avatar_frame);
     }
+    applyTheme(user.active_theme);
+  }
+
+  /**
+   * Apply the user's equipped theme (or "default") to the document root.
+   * Reading from <html data-theme> means every page that loads base.css
+   * picks up the palette automatically, no JS-per-component needed.
+   */
+  function applyTheme(themeRecord) {
+    const palette = themeRecord?.meta_data?.palette;
+    if (palette) {
+      document.documentElement.setAttribute('data-theme', palette);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+
+  /**
+   * Apply (or clear) the equipped avatar frame ring on an .avatar element.
+   * The frame colour comes from the shop item's meta_data.color.
+   */
+  function applyFrameTo(el, frameRecord) {
+    if (!el) return;
+    if (frameRecord) {
+      const color = frameRecord.meta_data?.color || 'gold';
+      el.classList.add('has-frame');
+      el.style.setProperty('--frame-color', cssColorFor(color));
+    } else {
+      el.classList.remove('has-frame');
+      el.style.removeProperty('--frame-color');
+    }
+  }
+
+  /**
+   * Map shop-item `meta_data.color` keys to actual CSS colors.
+   * Add more entries here as new frames are seeded.
+   */
+  function cssColorFor(name) {
+    const map = {
+      'purple-gold': '#ffd700',
+      'cosmic': '#a78bfa',
+      'gold': '#ffd700',
+      'crown': '#fcd34d',
+      'silver': '#c0c0c0',
+      'fire': '#ff6b6b',
+      'ocean': '#38f9d7'
+    };
+    return map[name] || name || '#ffd700';
+  }
+
+  /**
+   * Backend uploaded media is served at /uploads/... on the same host as the API.
+   * Convert relative paths so the frontend (different origin) can load them.
+   */
+  function absoluteMediaUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+    const apiBase = (window.SMARTHABBIT_API_URL || 'http://localhost:3000');
+    if (url.startsWith('/')) return apiBase + url;
+    return url; // relative file (e.g. img/presets/01-fox.svg) — leave alone
   }
 
   /* ---------- Page init ---------- */
@@ -233,8 +407,9 @@
   }
 
   global.ui = {
-    toast, openModal, closeModal,
+    toast, actionToast, openModal, closeModal,
     initLayout, renderSidebar, renderTopbar, applyUser,
+    applyTheme, applyFrameTo, cssColorFor, absoluteMediaUrl,
     escapeHtml, formatDate, formatRelativeTime,
     difficultyBadge, xpForLevel, levelFromXp, progressToNextLevel
   };

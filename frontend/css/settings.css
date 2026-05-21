@@ -120,6 +120,84 @@ input:checked + .slider::before {
   min-width: 200px;
 }
 
+/* --- v2: theme picker --- */
+.theme-picker {
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.theme-picker strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.theme-picker .text-muted {
+  font-size: 13px;
+  margin-bottom: var(--sp-3);
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--sp-3);
+}
+
+.theme-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: var(--sp-3);
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--t-fast), transform var(--t-fast);
+  position: relative;
+}
+
+.theme-tile:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.theme-tile.is-active {
+  border-color: #8b9bff;
+  box-shadow: 0 0 0 1px #8b9bff;
+}
+
+.theme-tile-swatch {
+  width: 72px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-swatch-default  { background: linear-gradient(135deg, #667eea, #764ba2); }
+.theme-swatch-midnight { background: linear-gradient(135deg, #6366f1, #1e1b4b); }
+.theme-swatch-sunrise  { background: linear-gradient(135deg, #ff8a4c, #f5576c); }
+.theme-swatch-ocean    { background: linear-gradient(135deg, #00c6fb, #005bea); }
+.theme-swatch-forest   { background: linear-gradient(135deg, #16a34a, #064e3b); }
+.theme-swatch-cherry   { background: linear-gradient(135deg, #f472b6, #be185d); }
+.theme-swatch-steel    { background: linear-gradient(135deg, #64748b, #1e293b); }
+.theme-swatch-lavender { background: linear-gradient(135deg, #a78bfa, #6d28d9); }
+.theme-swatch-inferno  { background: linear-gradient(135deg, #ef4444, #7f1d1d); }
+.theme-swatch-aurora   { background: linear-gradient(135deg, #06b6d4, #7c3aed); }
+.theme-swatch-mono     { background: linear-gradient(135deg, #f5f5f5, #737373); }
+
+.theme-tile-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.theme-tile-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: #43e97b;
+  font-size: 16px;
+}
+
 @media (max-width: 900px) {
   .settings-layout {
     grid-template-columns: 1fr;

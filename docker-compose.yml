@@ -1,0 +1,64 @@
+# SmartHabbit — full stack in one command.
+#
+#   docker compose up --build
+#
+# Then open http://localhost:5500/index.html
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: smarthabbit-db
+    environment:
+      POSTGRES_DB:       smarthabbit
+      POSTGRES_USER:     smarthabbit
+      POSTGRES_PASSWORD: smarthabbit
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smarthabbit -d smarthabbit"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: smarthabbit-api
+    environment:
+      NODE_ENV:         production
+      HOST:             0.0.0.0
+      PORT:             3000
+      DB_HOST:          db
+      DB_PORT:          5432
+      DB_NAME:          smarthabbit
+      DB_USER:          smarthabbit
+      DB_PASSWORD:      smarthabbit
+      DB_SSL:           "false"
+      JWT_SECRET:       "compose-dev-jwt-secret-change-me-in-prod"
+      JWT_EXPIRY:       24h
+      REFRESH_TOKEN_EXPIRY: 7d
+      API_URL:          http://localhost:3000
+      CORS_ORIGIN:      "http://localhost:5500,http://localhost,http://localhost:80,null"
+      RATE_LIMIT_WINDOW: 15
+      RATE_LIMIT_MAX_REQUESTS: 1000
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "3000"
+    ports:
+      # exposed for local debugging; nginx proxies in compose
+      - "3000:3000"
+
+  frontend:
+    build: ./frontend
+    container_name: smarthabbit-web
+    depends_on:
+      - backend
+    ports:
+      - "5500:80"
+
+volumes:
+  pgdata:
+  uploads:

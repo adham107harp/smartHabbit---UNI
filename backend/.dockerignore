@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log*
+dist
+.env
+.env.*
+!.env.example
+uploads/avatars/*
+!uploads/avatars/.gitkeep
+coverage
+.nyc_output
+*.log
+.DS_Store

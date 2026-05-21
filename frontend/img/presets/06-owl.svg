@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><linearGradient id="g6" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f093fb"/><stop offset="100%" stop-color="#5e35b1"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="60" fill="url(#g6)"/>
+  <polygon points="32,30 28,18 44,28" fill="#7b1fa2"/>
+  <polygon points="88,30 92,18 76,28" fill="#7b1fa2"/>
+  <ellipse cx="60" cy="62" rx="36" ry="38" fill="#9c6dd2"/>
+  <ellipse cx="60" cy="80" rx="22" ry="18" fill="#ce93d8"/>
+  <circle cx="46" cy="58" r="14" fill="#fff"/>
+  <circle cx="74" cy="58" r="14" fill="#fff"/>
+  <circle cx="46" cy="58" r="8" fill="#1a1a2e"/>
+  <circle cx="74" cy="58" r="8" fill="#1a1a2e"/>
+  <circle cx="48" cy="56" r="2.5" fill="#fff"/>
+  <circle cx="76" cy="56" r="2.5" fill="#fff"/>
+  <polygon points="56,72 64,72 60,80" fill="#ffd700"/>
+</svg>

@@ -69,50 +69,66 @@ export class SocialService {
   }
 
   /**
-   * Accept friend request
+   * Accept a pending friend request.
+   *
+   * The frontend sends the friends-row id (not the friend's user_id),
+   * so we look up the row by id and verify the caller is the recipient
+   * (the row's `friend_id`). Returns true if it actually flipped state,
+   * false if nothing matched — route maps that to a 404.
    */
-  async acceptFriendRequest(userId: string, friendId: string): Promise<void> {
+  async acceptFriendRequest(recipientUserId: string, friendsRowId: string): Promise<boolean> {
     const result = await this.pool.query(
-      `UPDATE friends 
-       SET status = 'accepted' 
-       WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'
-       RETURNING id`,
-      [friendId, userId]
+      `UPDATE friends
+          SET status = 'accepted'
+        WHERE id = $1
+          AND friend_id = $2
+          AND status = 'pending'
+      RETURNING user_id`,
+      [friendsRowId, recipientUserId]
     );
 
-    if (result.rows.length === 0) {
-      throw new Error('Friend request not found');
-    }
+    if (result.rowCount === 0) return false;
 
-    // Notify the requester
+    const requesterId = result.rows[0].user_id;
+    // Notify the original requester that their request was accepted.
     await this.pool.query(
       `INSERT INTO notifications (user_id, title, message, type)
        VALUES ($1, '✅ Friend Request Accepted', 'Your friend request was accepted!', 'friend_request')`,
-      [friendId]
+      [requesterId]
     );
+    return true;
   }
 
   /**
-   * Decline friend request
+   * Decline (delete) a pending friend request. Same id semantics as accept.
    */
-  async declineFriendRequest(userId: string, friendId: string): Promise<void> {
-    await this.pool.query(
-      `DELETE FROM friends 
-       WHERE user_id = $1 AND friend_id = $2 AND status = 'pending'`,
-      [friendId, userId]
+  async declineFriendRequest(recipientUserId: string, friendsRowId: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `DELETE FROM friends
+        WHERE id = $1
+          AND friend_id = $2
+          AND status = 'pending'
+      RETURNING id`,
+      [friendsRowId, recipientUserId]
     );
+    return (result.rowCount ?? 0) > 0;
   }
 
   /**
-   * Remove friend
+   * Remove an existing friend. The frontend passes the friends-row id from
+   * getUserFriends, so we look up by id and verify the caller is on either
+   * side of the friendship.
    */
-  async removeFriend(userId: string, friendId: string): Promise<void> {
-    await this.pool.query(
-      `DELETE FROM friends 
-       WHERE (user_id = $1 AND friend_id = $2 AND status = 'accepted')
-       OR (user_id = $2 AND friend_id = $1 AND status = 'accepted')`,
-      [userId, friendId]
+  async removeFriend(callerUserId: string, friendsRowId: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `DELETE FROM friends
+        WHERE id = $1
+          AND status = 'accepted'
+          AND (user_id = $2 OR friend_id = $2)
+      RETURNING id`,
+      [friendsRowId, callerUserId]
     );
+    return (result.rowCount ?? 0) > 0;
   }
 
   /**
@@ -136,15 +152,27 @@ export class SocialService {
   }
 
   /**
-   * Get user's friends list
+   * Get user's accepted friends list. Returns rows from EITHER direction —
+   * if A sent to B and was accepted, the friendship shows up for both.
+   * `id` is the friends-row id (used by the frontend to remove the friend).
+   * `friend_user_id` is the OTHER party's user id (for messaging, profile links).
    */
   async getUserFriends(userId: string, limit: number = 50): Promise<Friend[]> {
     const result = await this.pool.query(
-      `SELECT 
-        f.id, f.user_id, f.friend_id, u.username, u.avatar_url, u.level, u.xp, f.status, f.created_at
+      `SELECT
+         f.id,
+         f.user_id,
+         f.friend_id,
+         CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END AS friend_user_id,
+         u.username, u.avatar_url, u.level, u.xp,
+         f.status, f.created_at,
+         u.current_streak
        FROM friends f
-       INNER JOIN users u ON f.friend_id = u.id
-       WHERE f.user_id = $1 AND f.status = 'accepted' AND u.deleted_at IS NULL
+       INNER JOIN users u
+              ON u.id = CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END
+       WHERE (f.user_id = $1 OR f.friend_id = $1)
+         AND f.status = 'accepted'
+         AND u.deleted_at IS NULL
        ORDER BY f.created_at DESC
        LIMIT $2`,
       [userId, limit]

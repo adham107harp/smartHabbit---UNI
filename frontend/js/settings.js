@@ -57,13 +57,61 @@
 
   /* --- Preferences --- */
   const prefs = getPrefs();
-  const themeSel = document.getElementById('pref-theme');
-  themeSel.value = prefs.theme;
-  themeSel.addEventListener('change', () => {
-    prefs.theme = themeSel.value;
-    savePrefs(prefs);
-    ui.toast('Theme saved.', 'success');
-  });
+
+  /* Theme picker — v2: list user-owned themes + default; equip on click. */
+  async function loadThemePicker() {
+    const grid = document.querySelector('[data-theme-grid]');
+    if (!grid) return;
+    try {
+      const inv = await api.get('/shop/user/inventory');
+      const ownedThemes = (inv.inventory || inv || []).filter(i => i.item_type === 'theme');
+      renderThemeGrid(grid, ownedThemes);
+    } catch (err) {
+      grid.innerHTML = `<p class="text-muted">Couldn't load themes: ${ui.escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  function renderThemeGrid(grid, ownedThemes) {
+    const activeId = user.active_theme?.id || null;
+    const themes = [
+      { id: null, name: 'Default', meta_data: { palette: 'default' } },
+      ...ownedThemes
+    ];
+    grid.innerHTML = themes.map(t => {
+      const palette = t.meta_data?.palette || 'default';
+      const isActive = (t.id || null) === activeId;
+      return `
+        <button class="theme-tile ${isActive ? 'is-active' : ''}" data-theme-id="${t.id || ''}" data-palette="${palette}">
+          <span class="theme-tile-swatch theme-swatch-${palette}"></span>
+          <span class="theme-tile-name">${ui.escapeHtml(t.name)}</span>
+          ${isActive ? '<i class="fa-solid fa-circle-check theme-tile-check"></i>' : ''}
+        </button>
+      `;
+    }).join('');
+    grid.querySelectorAll('[data-theme-id]').forEach(t => {
+      t.addEventListener('click', () => equipTheme(t.dataset.themeId || null, t.dataset.palette));
+    });
+  }
+
+  async function equipTheme(themeId, palette) {
+    try {
+      if (themeId) {
+        await api.post(`/shop/items/${themeId}/equip`);
+      } else {
+        await api.post('/shop/items/unequip/theme');
+      }
+      // Refresh /me so the user record reflects the new active_theme
+      const me = await api.get('/users/me');
+      user = me.user || me;
+      api.setTokens({ user });
+      ui.applyTheme(user.active_theme);
+      ui.applyUser(document.querySelector('[data-topbar]'), user);
+      ui.toast(themeId ? 'Theme equipped.' : 'Default theme restored.', 'success');
+      loadThemePicker();
+    } catch (err) {
+      ui.toast(err.message || 'Could not change theme.', 'error');
+    }
+  }
 
   const wireToggle = (id, key) => {
     const el = document.getElementById(id);
@@ -113,4 +161,5 @@
   });
 
   await loadUser();
+  await loadThemePicker();
 })();

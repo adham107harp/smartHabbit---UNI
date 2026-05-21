@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/mystery.css">
   <link rel="stylesheet" href="css/settings.css">
 
   <script src="js/api.js"></script>
@@ -60,17 +61,12 @@
             <!-- PREFERENCES -->
             <section class="card" id="preferences">
               <div class="card-header"><h2 class="card-title">Preferences</h2></div>
-              <div class="setting-row">
-                <div>
-                  <strong>Theme</strong>
-                  <p class="text-muted">Pick the look that suits you.</p>
+              <div class="theme-picker" data-theme-picker>
+                <strong>Theme</strong>
+                <p class="text-muted">Pick the look that suits you. Buy more themes in the <a href="shop.html">shop</a>.</p>
+                <div class="theme-grid" data-theme-grid>
+                  <div class="loading-state"><div class="spinner"></div></div>
                 </div>
-                <select id="pref-theme">
-                  <option value="dark">Dark (default)</option>
-                  <option value="midnight">Midnight</option>
-                  <option value="sunrise">Sunrise</option>
-                  <option value="ocean">Ocean</option>
-                </select>
               </div>
               <div class="setting-row">
                 <div>
@@ -156,7 +152,10 @@
     </div>
   </div>
 
+  <script src="js/sound.js"></script>
+  <script src="js/reminders.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/mystery.js"></script>
   <script src="js/settings.js"></script>
 </body>
 </html>

@@ -825,3 +825,203 @@ body::before {
     display: none;
   }
 }
+
+/* =========================================================================
+   v2 — theme palettes
+   Set <html data-theme="midnight|sunrise|ocean"> to swap the whole UI.
+   Because every other stylesheet consumes these CSS custom properties,
+   no per-component patching is needed.
+   ========================================================================= */
+
+[data-theme="midnight"] {
+  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #1e1b4b 100%);
+  --secondary-gradient: linear-gradient(135deg, #a78bfa 0%, #4338ca 100%);
+  --accent-cyan: #818cf8;
+  --bg-primary: #05060f;
+  --bg-secondary: #0c0e1f;
+  --surface-1: rgba(99, 102, 241, 0.05);
+  --surface-2: rgba(99, 102, 241, 0.10);
+  --surface-3: rgba(99, 102, 241, 0.18);
+  --border: rgba(129, 140, 248, 0.15);
+  --border-strong: rgba(129, 140, 248, 0.28);
+  --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.35);
+}
+
+[data-theme="sunrise"] {
+  --primary-gradient: linear-gradient(135deg, #ff8a4c 0%, #f5576c 100%);
+  --secondary-gradient: linear-gradient(135deg, #ffd700 0%, #ff8a4c 100%);
+  --accent-cyan: #ffb74d;
+  --accent-gold: #ffeb3b;
+  --bg-primary: #1f0a14;
+  --bg-secondary: #2a0e18;
+  --surface-1: rgba(255, 138, 76, 0.06);
+  --surface-2: rgba(255, 138, 76, 0.11);
+  --surface-3: rgba(255, 138, 76, 0.18);
+  --border: rgba(255, 183, 77, 0.18);
+  --border-strong: rgba(255, 183, 77, 0.32);
+  --shadow-glow: 0 0 40px rgba(245, 87, 108, 0.4);
+}
+
+[data-theme="ocean"] {
+  --primary-gradient: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+  --secondary-gradient: linear-gradient(135deg, #38f9d7 0%, #00c6fb 100%);
+  --accent-cyan: #38f9d7;
+  --bg-primary: #021426;
+  --bg-secondary: #042039;
+  --surface-1: rgba(0, 198, 251, 0.06);
+  --surface-2: rgba(0, 198, 251, 0.10);
+  --surface-3: rgba(0, 198, 251, 0.18);
+  --border: rgba(56, 249, 215, 0.18);
+  --border-strong: rgba(56, 249, 215, 0.30);
+  --shadow-glow: 0 0 40px rgba(0, 198, 251, 0.35);
+}
+
+/* ---------- v3 themes (7 more) ---------- */
+
+[data-theme="forest"] {
+  --primary-gradient: linear-gradient(135deg, #16a34a 0%, #064e3b 100%);
+  --secondary-gradient: linear-gradient(135deg, #4ade80 0%, #15803d 100%);
+  --accent-cyan: #6ee7b7;
+  --bg-primary: #06120b;
+  --bg-secondary: #0a1c12;
+  --surface-1: rgba(22, 163, 74, 0.07);
+  --surface-2: rgba(22, 163, 74, 0.12);
+  --surface-3: rgba(22, 163, 74, 0.20);
+  --border: rgba(110, 231, 183, 0.18);
+  --border-strong: rgba(110, 231, 183, 0.32);
+  --shadow-glow: 0 0 40px rgba(22, 163, 74, 0.35);
+}
+
+[data-theme="cherry"] {
+  --primary-gradient: linear-gradient(135deg, #f472b6 0%, #be185d 100%);
+  --secondary-gradient: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+  --accent-cyan: #fda4af;
+  --bg-primary: #1f0712;
+  --bg-secondary: #2a0c1a;
+  --surface-1: rgba(244, 114, 182, 0.07);
+  --surface-2: rgba(244, 114, 182, 0.12);
+  --surface-3: rgba(244, 114, 182, 0.20);
+  --border: rgba(253, 164, 175, 0.20);
+  --border-strong: rgba(253, 164, 175, 0.34);
+  --shadow-glow: 0 0 40px rgba(244, 114, 182, 0.35);
+}
+
+[data-theme="steel"] {
+  --primary-gradient: linear-gradient(135deg, #64748b 0%, #1e293b 100%);
+  --secondary-gradient: linear-gradient(135deg, #94a3b8 0%, #475569 100%);
+  --accent-cyan: #94a3b8;
+  --bg-primary: #0b1220;
+  --bg-secondary: #131c2c;
+  --surface-1: rgba(148, 163, 184, 0.06);
+  --surface-2: rgba(148, 163, 184, 0.11);
+  --surface-3: rgba(148, 163, 184, 0.20);
+  --border: rgba(148, 163, 184, 0.20);
+  --border-strong: rgba(148, 163, 184, 0.32);
+  --shadow-glow: 0 0 36px rgba(100, 116, 139, 0.32);
+}
+
+[data-theme="lavender"] {
+  --primary-gradient: linear-gradient(135deg, #a78bfa 0%, #6d28d9 100%);
+  --secondary-gradient: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 100%);
+  --accent-cyan: #c4b5fd;
+  --bg-primary: #150a25;
+  --bg-secondary: #1d0e34;
+  --surface-1: rgba(167, 139, 250, 0.07);
+  --surface-2: rgba(167, 139, 250, 0.12);
+  --surface-3: rgba(167, 139, 250, 0.20);
+  --border: rgba(196, 181, 253, 0.20);
+  --border-strong: rgba(196, 181, 253, 0.32);
+  --shadow-glow: 0 0 40px rgba(167, 139, 250, 0.35);
+}
+
+[data-theme="inferno"] {
+  --primary-gradient: linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%);
+  --secondary-gradient: linear-gradient(135deg, #fb923c 0%, #c2410c 100%);
+  --accent-cyan: #fb923c;
+  --accent-gold: #fbbf24;
+  --bg-primary: #1a0507;
+  --bg-secondary: #260a0d;
+  --surface-1: rgba(239, 68, 68, 0.06);
+  --surface-2: rgba(239, 68, 68, 0.11);
+  --surface-3: rgba(239, 68, 68, 0.20);
+  --border: rgba(251, 146, 60, 0.20);
+  --border-strong: rgba(251, 146, 60, 0.34);
+  --shadow-glow: 0 0 40px rgba(239, 68, 68, 0.40);
+}
+
+[data-theme="aurora"] {
+  --primary-gradient: linear-gradient(135deg, #06b6d4 0%, #7c3aed 100%);
+  --secondary-gradient: linear-gradient(135deg, #34d399 0%, #a78bfa 100%);
+  --accent-cyan: #67e8f9;
+  --bg-primary: #060c1c;
+  --bg-secondary: #0b1330;
+  --surface-1: rgba(124, 58, 237, 0.06);
+  --surface-2: rgba(6, 182, 212, 0.10);
+  --surface-3: rgba(124, 58, 237, 0.18);
+  --border: rgba(103, 232, 249, 0.20);
+  --border-strong: rgba(167, 139, 250, 0.30);
+  --shadow-glow: 0 0 40px rgba(103, 232, 249, 0.35);
+}
+
+[data-theme="mono"] {
+  --primary-gradient: linear-gradient(135deg, #f5f5f5 0%, #737373 100%);
+  --secondary-gradient: linear-gradient(135deg, #d4d4d4 0%, #404040 100%);
+  --accent-cyan: #e5e5e5;
+  --accent-gold: #fafafa;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --surface-1: rgba(245, 245, 245, 0.05);
+  --surface-2: rgba(245, 245, 245, 0.09);
+  --surface-3: rgba(245, 245, 245, 0.16);
+  --border: rgba(245, 245, 245, 0.16);
+  --border-strong: rgba(245, 245, 245, 0.28);
+  --shadow-glow: 0 0 40px rgba(245, 245, 245, 0.20);
+}
+
+/* =========================================================================
+   v2 — avatar frame
+   Adds a coloured ring around the .avatar element when the user equips a
+   frame. The ring colour comes from --frame-color (set inline by ui.js).
+   ========================================================================= */
+.avatar.has-frame,
+.profile-avatar.has-frame {
+  border: none;
+  position: relative;
+  box-shadow:
+    0 0 0 3px var(--frame-color, var(--accent-gold)),
+    0 0 16px color-mix(in srgb, var(--frame-color, var(--accent-gold)) 60%, transparent);
+}
+
+/* Fallback for browsers without color-mix() */
+@supports not (color: color-mix(in srgb, red, blue)) {
+  .avatar.has-frame,
+  .profile-avatar.has-frame {
+    box-shadow: 0 0 0 3px var(--frame-color, var(--accent-gold));
+  }
+}
+
+/* =========================================================================
+   v2 — actionable toast (for "Undo last log")
+   ========================================================================= */
+.toast.toast-actionable {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.toast .toast-action {
+  margin-left: auto;
+  padding: 4px 12px;
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toast .toast-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

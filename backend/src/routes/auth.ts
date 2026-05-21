@@ -11,6 +11,8 @@ import {
   formatUserResponse
 } from '../utils/auth';
 import { validateBody } from '../middleware/validation';
+import { authRateLimiter } from '../middleware/authRateLimiter';
+import { isAdminEmail } from '../middleware/requireAdmin';
 
 const router = Router();
 
@@ -19,6 +21,7 @@ const router = Router();
  */
 router.post(
   '/register',
+  authRateLimiter,
   validateBody({
     username: { required: true, type: 'string', minLength: 3, maxLength: 50 },
     email: { required: true, type: 'string' },
@@ -70,11 +73,12 @@ router.post(
 
       // Hash password and create user
       const passwordHash = await hashPassword(password);
+      const adminFlag = isAdminEmail(email);
       const user = await db.queryOne(
-        `INSERT INTO users (username, email, password_hash) 
-         VALUES ($1, $2, $3) 
-         RETURNING id, username, email, xp, level, coins, created_at`,
-        [username, email, passwordHash]
+        `INSERT INTO users (username, email, password_hash, is_admin)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, username, email, xp, level, coins, is_admin, created_at`,
+        [username, email, passwordHash, adminFlag]
       );
 
       const accessToken = generateToken({ userId: user.id, username: user.username });
@@ -101,6 +105,7 @@ router.post(
  */
 router.post(
   '/login',
+  authRateLimiter,
   validateBody({
     email: { required: true, type: 'string' },
     password: { required: true, type: 'string' }
@@ -125,6 +130,14 @@ router.post(
       if (!passwordMatch) {
         res.status(401).json({ success: false, message: 'Invalid credentials' });
         return;
+      }
+
+      // If this email is on the admin allowlist but the flag isn't set,
+      // upgrade them now. (e.g., the bootstrap row got dropped and the
+      // user re-registered — they should still be admin.)
+      if (isAdminEmail(user.email) && !user.is_admin) {
+        await db.query('UPDATE users SET is_admin = true WHERE id = $1', [user.id]);
+        user.is_admin = true;
       }
 
       const accessToken = generateToken({ userId: user.id, username: user.username });

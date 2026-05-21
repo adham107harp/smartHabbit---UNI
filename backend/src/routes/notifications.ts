@@ -1,7 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthRequest, authMiddleware } from '../middleware/auth';
 import { notificationService } from '../services/NotificationService';
-import { validateBody } from '../middleware/validation';
 
 const router = Router();
 
@@ -47,16 +46,16 @@ router.get('/unread/count', authMiddleware, async (req: AuthRequest, res: Respon
 });
 
 /**
- * PUT /api/notifications/:id/read - Mark as read
+ * PUT /api/notifications/:id/read - Mark as read (must own the notification).
  */
 router.put('/:id/read', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    await notificationService.markAsRead(req.params.id);
-
-    res.json({
-      success: true,
-      message: 'Notification marked as read'
-    });
+    const ok = await notificationService.markAsRead(req.params.id, req.userId!);
+    if (!ok) {
+      res.status(404).json({ success: false, code: 'NOTIFICATION_NOT_FOUND', message: 'Notification not found.' });
+      return;
+    }
+    res.json({ success: true, message: 'Notification marked as read' });
   } catch (error) {
     console.error('Mark as read error:', error);
     res.status(500).json({ success: false, message: 'Failed to mark as read' });
@@ -82,16 +81,16 @@ router.put('/mark-all/read', authMiddleware, async (req: AuthRequest, res: Respo
 });
 
 /**
- * DELETE /api/notifications/:id - Delete notification
+ * DELETE /api/notifications/:id - Delete notification (must own it).
  */
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    await notificationService.deleteNotification(req.params.id);
-
-    res.json({
-      success: true,
-      message: 'Notification deleted'
-    });
+    const ok = await notificationService.deleteNotification(req.params.id, req.userId!);
+    if (!ok) {
+      res.status(404).json({ success: false, code: 'NOTIFICATION_NOT_FOUND', message: 'Notification not found.' });
+      return;
+    }
+    res.json({ success: true, message: 'Notification deleted' });
   } catch (error) {
     console.error('Delete notification error:', error);
     res.status(500).json({ success: false, message: 'Failed to delete notification' });

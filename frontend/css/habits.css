@@ -1,5 +1,15 @@
 /* Habits list + habit detail */
 
+.habit-reminder {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent-cyan);
+  font-weight: 500;
+}
+.habit-reminder i { font-size: 11px; }
+
+
 .habit-filters {
   display: flex;
   gap: var(--sp-2);

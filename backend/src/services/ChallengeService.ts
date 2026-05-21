@@ -1,5 +1,7 @@
+import { Pool, PoolClient } from 'pg';
 import { db } from '../config/database';
-import { Pool } from 'pg';
+
+type Querier = Pick<PoolClient, 'query'>;
 
 export interface ChallengeProgress {
   challengeId: string;
@@ -22,60 +24,56 @@ export class ChallengeService {
   private pool: Pool = db.getPool();
 
   /**
-   * Update challenge progress after habit completion
+   * Update challenge progress after habit completion.
+   * Pass `client` to participate in an outer transaction.
    */
   async updateChallengeProgress(
     userId: string,
-    habitId: string
+    habitId: string,
+    client?: PoolClient
   ): Promise<CompletedChallenge[]> {
-    return await db.transaction(async (client) => {
+    const run = async (q: Querier): Promise<CompletedChallenge[]> => {
       const completedChallenges: CompletedChallenge[] = [];
 
-      // Get active challenges for this user
-      const activeChallengesResult = await client.query(
+      const activeChallengesResult = await q.query(
         `SELECT uc.*, c.target_value, c.reward_xp, c.reward_coins, c.badge_id
-         FROM user_challenges uc
-         INNER JOIN challenges c ON uc.challenge_id = c.id
-         WHERE uc.user_id = $1 AND uc.status = 'joined' 
-         AND c.end_date > NOW()`,
+           FROM user_challenges uc
+          INNER JOIN challenges c ON uc.challenge_id = c.id
+          WHERE uc.user_id = $1 AND uc.status = 'joined'
+            AND c.end_date > NOW()`,
         [userId]
       );
 
       for (const challenge of activeChallengesResult.rows) {
-        // Increment progress
         const newProgress = challenge.progress + 1;
 
         if (newProgress >= challenge.target_value) {
-          // Challenge completed!
-          await client.query(
-            `UPDATE user_challenges 
-             SET status = 'completed', progress = $1, completed_at = NOW() 
-             WHERE user_id = $2 AND challenge_id = $3`,
+          await q.query(
+            `UPDATE user_challenges
+                SET status = 'completed', progress = $1, completed_at = NOW()
+              WHERE user_id = $2 AND challenge_id = $3`,
             [newProgress, userId, challenge.challenge_id]
           );
 
-          // Award XP and coins
-          await client.query(
-            `UPDATE users 
-             SET xp = xp + $1, coins = coins + $2, updated_at = NOW() 
-             WHERE id = $3`,
+          await q.query(
+            `UPDATE users
+                SET xp = xp + $1, coins = coins + $2, updated_at = NOW()
+              WHERE id = $3`,
             [challenge.reward_xp, challenge.reward_coins, userId]
           );
 
-          // Award badge if one exists
           if (challenge.badge_id) {
-            await client.query(
+            await q.query(
               `INSERT INTO user_badges (user_id, badge_id, earned_at)
-               VALUES ($1, $2, NOW())
-               ON CONFLICT DO NOTHING`,
+               VALUES ($1, $2, NOW()) ON CONFLICT DO NOTHING`,
               [userId, challenge.badge_id]
             );
           }
 
-          // Create celebration notification
-          await client.query(
+          await q.query(
             `INSERT INTO notifications (user_id, title, message, type, related_challenge_id)
-             VALUES ($1, '🎉 Challenge Complete!', 'You completed a challenge and earned rewards!', 
+             VALUES ($1, '🎉 Challenge Complete!',
+                     'You completed a challenge and earned rewards!',
                      'challenge_complete', $2)`,
             [userId, challenge.challenge_id]
           );
@@ -88,18 +86,20 @@ export class ChallengeService {
             badgeAwarded: challenge.badge_id
           });
         } else {
-          // Just update progress
-          await client.query(
-            `UPDATE user_challenges 
-             SET progress = $1 
-             WHERE user_id = $2 AND challenge_id = $3`,
+          await q.query(
+            `UPDATE user_challenges
+                SET progress = $1
+              WHERE user_id = $2 AND challenge_id = $3`,
             [newProgress, userId, challenge.challenge_id]
           );
         }
       }
 
       return completedChallenges;
-    });
+    };
+
+    if (client) return run(client);
+    return db.transaction(async (c) => run(c));
   }
 
   /**

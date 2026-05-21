@@ -126,6 +126,15 @@
     `).join('');
   }
 
+  async function refreshTopbar() {
+    try {
+      const me = await api.get('/users/me');
+      const user = me.user || me;
+      api.setTokens({ user });
+      ui.applyUser(document.querySelector('[data-topbar]'), user);
+    } catch { /* ignore */ }
+  }
+
   async function logToday() {
     const btn = document.getElementById('log-now');
     btn.disabled = true;
@@ -134,14 +143,49 @@
       const data = await api.post(`/habits/${id}/log`, { value: 1 });
       const xp = data.habitCompletion?.xpEarned ?? 0;
       const coins = data.habitCompletion?.coinsEarned ?? 0;
-      ui.toast(`+${xp} XP, +${coins} coins`, 'success');
-      (data.badgesEarned || []).forEach(b => ui.toast(`Badge unlocked: ${b.badgeName}`, 'success', 5000));
+      const leveledUp = data.habitCompletion?.leveledUp;
+      const mysteryBoxId = data.habitCompletion?.mysteryBoxId;
+      window.sound && sound.play(leveledUp ? 'levelup' : 'log');
       await load();
+      await refreshTopbar();
+      if (mysteryBoxId && window.mystery) mystery.refresh();
+
+      ui.actionToast(
+        `+${xp} XP, +${coins} coins`,
+        'Undo',
+        async () => {
+          try {
+            await api.delete(`/habits/${id}/log/last`);
+            window.sound && sound.play('undo');
+            ui.toast('Log undone.', 'info');
+            await load();
+            await refreshTopbar();
+          } catch (err) {
+            if (err.code === 'UNDO_WINDOW_EXPIRED') {
+              ui.toast('Too late — that log is locked in.', 'info');
+            } else {
+              ui.toast(err.message || 'Could not undo.', 'error');
+            }
+          }
+        },
+        'success',
+        60000
+      );
+
+      (data.badgesEarned || []).forEach(b => {
+        window.sound && sound.play('badge');
+        ui.toast(`Badge unlocked: ${b.badgeName}`, 'success', 5000);
+      });
     } catch (err) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-check"></i> Log today';
-      const msg = /already/i.test(err.message) ? 'You already logged this today.' : err.message;
-      ui.toast(msg, 'error');
+      window.sound && sound.play('error');
+      if (err.code === 'HABIT_ALREADY_AT_TARGET' || err.code === 'HABIT_ALREADY_LOGGED') {
+        ui.toast("You've already hit today's target for this habit!", 'info');
+        await load();
+      } else {
+        ui.toast(err.message || 'Could not log this habit.', 'error');
+      }
     }
   }
 

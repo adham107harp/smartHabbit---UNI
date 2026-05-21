@@ -81,11 +81,16 @@
 
   document.getElementById('mark-all-read').addEventListener('click', async () => {
     try {
-      await api.put('/notifications/mark-all/read');
-      ui.toast('All notifications marked as read.', 'success');
+      const res = await api.put('/notifications/mark-all/read');
+      const n = res?.count ?? '';
+      ui.toast(n ? `Marked ${n} notification${n === 1 ? '' : 's'} as read.` : 'All caught up.', 'success');
       await load();
     } catch (err) {
-      ui.toast(err.message || 'Could not mark all read.', 'error');
+      console.warn('mark-all-read failed:', err);
+      const msg = err?.code === 'SESSION_EXPIRED'
+        ? 'You were logged out. Sign in again.'
+        : (err?.message || 'Could not mark all as read.');
+      ui.toast(msg, 'error');
     }
   });
 
@@ -96,7 +101,8 @@
       ui.toast('Notifications cleared.', 'success');
       await load();
     } catch (err) {
-      ui.toast(err.message || 'Could not clear.', 'error');
+      console.warn('clear-all failed:', err);
+      ui.toast(err?.message || 'Could not clear.', 'error');
     }
   });
 

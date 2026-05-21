@@ -34,6 +34,9 @@
     renderHabits(habitArr);
     renderBadges(badgeArr);
     renderChallenges(chArr);
+
+    if (window.reminders) reminders.scheduleAll(habitArr);
+    if (window.mystery) mystery.refresh();
   }
 
   function renderHero(user, badgeCount) {
@@ -60,8 +63,12 @@
         </div>`;
       return;
     }
-    habitList.innerHTML = habits.map(h => `
-      <div class="habit-row" data-id="${h.id}">
+    habitList.innerHTML = habits.map(h => {
+      const progress = Number(h.today_progress || 0);
+      const target = Number(h.target_value || 1);
+      const done = !!h.is_done_today;
+      return `
+      <div class="habit-row ${done ? 'is-done' : ''}" data-id="${h.id}">
         <div class="habit-meta">
           <div class="habit-icon">${pickIcon(h.difficulty)}</div>
           <div class="habit-info">
@@ -71,7 +78,7 @@
               <span class="dot"></span>
               <span>${h.goal_type === 'weekly' ? 'Weekly' : 'Daily'}</span>
               <span class="dot"></span>
-              <span>Target: ${h.target_value}</span>
+              <span>${progress} / ${target} today</span>
             </div>
           </div>
         </div>
@@ -79,12 +86,14 @@
           <a class="btn btn-ghost btn-sm" href="habit-detail.html?id=${h.id}">
             <i class="fa-solid fa-chart-line"></i> Details
           </a>
-          <button class="btn btn-primary btn-sm" data-log="${h.id}">
-            <i class="fa-solid fa-check"></i> Log
-          </button>
+          ${done
+            ? `<button class="btn btn-success btn-sm" disabled><i class="fa-solid fa-check"></i> Done</button>`
+            : `<button class="btn btn-primary btn-sm" data-log="${h.id}">
+                 <i class="fa-solid fa-plus"></i> ${target > 1 ? 'Log +1' : 'Log'}
+               </button>`}
         </div>
       </div>
-    `).join('');
+    `;}).join('');
     habitList.querySelectorAll('[data-log]').forEach(btn => {
       btn.addEventListener('click', () => logHabit(btn.dataset.log, btn));
     });
@@ -103,28 +112,73 @@
       const data = await api.post(`/habits/${habitId}/log`, { value: 1 });
       const xp = data.habitCompletion?.xpEarned ?? 0;
       const coins = data.habitCompletion?.coinsEarned ?? 0;
+      const leveledUp = data.habitCompletion?.leveledUp;
+      const justCompleted = data.habitCompletion?.justCompleted;
+      const todayProgress = data.habitCompletion?.todayProgress ?? 0;
+      const target = data.habitCompletion?.targetValue ?? 1;
+      const mysteryBoxId = data.habitCompletion?.mysteryBoxId;
       const newBadges = data.badgesEarned || [];
 
       const row = btn.closest('.habit-row');
-      if (row) row.classList.add('is-done');
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Done';
+      if (justCompleted && row) row.classList.add('is-done');
+      btn.innerHTML = justCompleted
+        ? '<i class="fa-solid fa-check"></i> Done'
+        : `<i class="fa-solid fa-plus"></i> ${todayProgress}/${target}`;
+      if (justCompleted) btn.classList.replace('btn-primary', 'btn-success');
 
-      ui.toast(`+${xp} XP, +${coins} coins`, 'success');
+      if (window.sound) sound.play(leveledUp ? 'levelup' : 'log');
+
+      // Refresh the whole dashboard so habit progress + hero stay in sync.
+      const refresh = async () => {
+        await load();
+        const me = await api.get('/users/me');
+        const user = me.user || me;
+        api.setTokens({ user });
+        ui.applyUser(document.querySelector('[data-topbar]'), user);
+      };
+      await refresh();
+
+      // If this log just earned a mystery box, surface it immediately.
+      if (mysteryBoxId && window.mystery) mystery.refresh();
+
+      ui.actionToast(
+        `+${xp} XP, +${coins} coins`,
+        'Undo',
+        async () => {
+          try {
+            await api.delete(`/habits/${habitId}/log/last`);
+            if (row) row.classList.remove('is-done');
+            btn.disabled = false;
+            btn.innerHTML = original;
+            window.sound && sound.play('undo');
+            ui.toast('Log undone.', 'info');
+            await refresh();
+          } catch (err) {
+            if (err.code === 'UNDO_WINDOW_EXPIRED') {
+              ui.toast('Too late — that log is locked in.', 'info');
+            } else {
+              ui.toast(err.message || 'Could not undo.', 'error');
+            }
+          }
+        },
+        'success',
+        60000
+      );
+
       newBadges.forEach(b => {
+        window.sound && sound.play('badge');
         ui.toast(`Badge unlocked: ${b.badgeName}`, 'success', 5000);
       });
-
-      // Refresh hero numbers
-      const me = await api.get('/users/me');
-      const earned = await api.get('/badges/user/earned');
-      renderHero(me.user || me, (earned.badges || earned || []).length);
     } catch (err) {
       btn.disabled = false;
       btn.innerHTML = original;
-      const msg = err.code === 'HABIT_ALREADY_LOGGED' || /already/i.test(err.message)
-        ? 'You already logged this one today.'
-        : (err.message || 'Could not log this habit.');
-      ui.toast(msg, 'error');
+      window.sound && sound.play('error');
+      if (err.code === 'HABIT_ALREADY_AT_TARGET' || err.code === 'HABIT_ALREADY_LOGGED') {
+        ui.toast("You've already hit today's target for this habit!", 'info');
+        await load();
+      } else {
+        ui.toast(err.message || 'Could not log this habit.', 'error');
+      }
     }
   }
 

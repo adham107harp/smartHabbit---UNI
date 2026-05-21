@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · SmartHabbit</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/mystery.css">
+  <link rel="stylesheet" href="css/admin.css">
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside data-sidebar></aside>
+
+    <div class="main-area">
+      <header data-topbar></header>
+
+      <main class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Admin portal</h1>
+            <p class="page-subtitle">Manage users, the catalog, and broadcast messages.</p>
+          </div>
+        </div>
+
+        <div class="tabs admin-tabs">
+          <button class="tab active" data-admin-tab="dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+          <button class="tab" data-admin-tab="users"><i class="fa-solid fa-users"></i> Users</button>
+          <button class="tab" data-admin-tab="badges"><i class="fa-solid fa-medal"></i> Badges</button>
+          <button class="tab" data-admin-tab="challenges"><i class="fa-solid fa-trophy"></i> Challenges</button>
+          <button class="tab" data-admin-tab="shop"><i class="fa-solid fa-bag-shopping"></i> Shop</button>
+          <button class="tab" data-admin-tab="broadcast"><i class="fa-solid fa-bullhorn"></i> Broadcast</button>
+        </div>
+
+        <section data-admin-pane>
+          <div class="loading-state"><div class="spinner spinner-lg"></div></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/sound.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/mystery.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
